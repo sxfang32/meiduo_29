@@ -30,7 +30,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 # 注册和安装应用
@@ -60,7 +59,7 @@ ROOT_URLCONF = 'meiduo_mall.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.jinja2.Jinja2',   # 指定模板引擎
+        'BACKEND': 'django.template.backends.jinja2.Jinja2',  # 指定模板引擎
         'DIRS': [os.path.join(BASE_DIR, 'templates')],  # 指定模板文件路径
         'APP_DIRS': True,
         'OPTIONS': {
@@ -78,32 +77,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.27.129', # 数据库主机
-        'PORT': 3306, # 数据库端口
-        'USER': 'meiduo_29', # 数据库用户名
-        'PASSWORD': 'meiduo_29', # 数据库用户密码
-        'NAME': 'meiduo_29' # 数据库名字
+        'HOST': '192.168.27.129',  # 数据库主机
+        'PORT': 3306,  # 数据库端口
+        'USER': 'meiduo_29',  # 数据库用户名
+        'PASSWORD': 'meiduo_29',  # 数据库用户密码
+        'NAME': 'meiduo_29'  # 数据库名字
 
     }
 }
 
 # redis数据库
 CACHES = {
-    "default": { # 默认
+    "default": {  # 默认
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://192.168.27.129:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "session": { # session
+    "session": {  # session
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://192.168.27.129:6379/1",
         "OPTIONS": {
@@ -133,7 +131,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -146,7 +143,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
@@ -196,3 +192,6 @@ LOGGING = {
         },
     }
 }
+
+# 指定认证模型类
+AUTH_USER_MODEL = 'users.User'
