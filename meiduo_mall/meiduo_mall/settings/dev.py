@@ -10,11 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import os
+import os, sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+# 追加系统导包路径
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+# 以后在导包/模板时，apps中的就必须基于apps导包路径，其他全部基于外层meiduo_mall
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -31,6 +33,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# 注册和安装应用
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 只有当应用中用到模型需求迁移建表， 或应用中使用了模板时才需要注册，如果应用中只有视图和路由这些代码，应用可以不用注册
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
