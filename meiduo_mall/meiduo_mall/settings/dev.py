@@ -23,6 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'enh#zx8+1+1^j#h@z7(*xy5vs^-hwaijq0wyd-eh&l#lfh$31$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# 默认开启调试模式：代码修改会自动重启，只有调试模式Django才提供静态文件访问支持
 DEBUG = True
 
 ALLOWED_HOSTS = []
