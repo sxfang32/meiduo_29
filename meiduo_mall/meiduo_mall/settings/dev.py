@@ -194,4 +194,5 @@ LOGGING = {
 }
 
 # 指定认证模型类
+# 指定模型类时，必须以应用名.类名的方式指定
 AUTH_USER_MODEL = 'users.User'
