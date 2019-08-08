@@ -1,3 +1,4 @@
+from django.contrib.auth import login
 from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -38,10 +39,11 @@ class RegisterView(View):
             return HttpResponseForbidden('请勾选用户协议')
         # 新增用户记录
         try:
-            User.objects.create_user(username=username, password=password, mobile=mobile)
+            user = User.objects.create_user(username=username, password=password, mobile=mobile)
         except DatabaseError:
             return render, 'register.html', {"register_errmsg": "注册失败"}
 
+        login(request, user)
 
         # 跳转到首页
         return redirect(reverse('contents:index'))
