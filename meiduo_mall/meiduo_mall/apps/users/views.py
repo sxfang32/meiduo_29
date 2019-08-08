@@ -3,10 +3,12 @@ from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
-from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
+from django import http
+
+from meiduo_mall.utils.response_code import RETCODE
 from .models import *
 import re
-
+from django_redis import get_redis_connection
 
 class RegisterView(View):
     """用户注册"""
@@ -27,17 +29,32 @@ class RegisterView(View):
         allow = query_dict.get('allow')
         # 校验数据
         if  all([username, password, password2, mobile, allow]) is False:
-            return HttpResponseForbidden('参数不全，请重新输入')
+            return http.HttpResponseForbidden('参数不全，请重新输入')
         if not re.match(r'^[a-zA-Z0-9_-]{5,20}$', username):
-            return HttpResponseForbidden('请输入5-20个字符的用户名')
+            return http.HttpResponseForbidden('请输入5-20个字符的用户名')
         if not re.match(r'^[a-zA-Z0-9]{8,20}$', password):
-            return HttpResponseForbidden('请输入8-20位的密码')
+            return http.HttpResponseForbidden('请输入8-20位的密码')
         if password2 != password:
-            return HttpResponseForbidden('两次输入的密码不一致')
+            return http.HttpResponseForbidden('两次输入的密码不一致')
         if not re.match(r'^1[3-9]\d{9}$', mobile):
-            return HttpResponseForbidden('您输入的手机号格式不正确')
+            return http.HttpResponseForbidden('您输入的手机号格式不正确')
 
-        # TODO:短信验证码校验后期补充
+        # 短信验证码校验
+        # 创建redis连接对象
+        redis_conn = get_redis_connection('verify_codes')
+        # 将redis中的短信验证码字符串获取出来,s
+        sms_code_server_bytes = redis_conn.get('sms_%s' % mobile)
+        # 短信验证码从redis获取出来之后就从Redis数据库中删除:让图形验证码只能用一次
+        redis_conn.delete('sms_%s' % mobile)
+        # 判断redis中是否获取到短信验证码(判断是否过期)
+        if sms_code_server_bytes is None:
+            return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码错误'})
+        # 从redis获取出来的数据注意数据类型问题byte
+        sms_code_server = sms_code_server_bytes.decode()
+        # 判断时要注意字典大小写问题
+        if sms_code != sms_code_server():
+            return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码输入错误'})
+
 
         # 使用表单提交，如果勾选了checkbox选项，会自动带上allow : on
         # if allow != 'on':
@@ -63,7 +80,7 @@ class UsernameCountView(View):
         # 从数据库查询当前username是否重复
         count = User.objects.filter(username=username).count()
         # 响应
-        return JsonResponse({"count": count})
+        return http.JsonResponse({"count": count})
 
 
 class MobileCountView(View):
@@ -72,7 +89,7 @@ class MobileCountView(View):
         # 从数据库查询当前username是否重复
         count = User.objects.filter(mobile=mobile).count()
         # 响应
-        return JsonResponse({"count": count})
+        return http.JsonResponse({"count": count})
 
 
 
