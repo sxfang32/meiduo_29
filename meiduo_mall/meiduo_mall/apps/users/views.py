@@ -3,8 +3,8 @@ from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
-from django.http import HttpResponseForbidden, HttpResponse
-from users.models import *
+from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
+from .models import *
 import re
 
 
@@ -23,7 +23,7 @@ class RegisterView(View):
         password = query_dict.get('password')
         password2 = query_dict.get('password2')
         mobile = query_dict.get('mobile')
-        sms_code =query_dict.get('sms_code')
+        sms_code = query_dict.get('sms_code')
         allow = query_dict.get('allow')
         # 校验数据
         if not all([username, password, password2, mobile, allow]):
@@ -48,8 +48,28 @@ class RegisterView(View):
         except DatabaseError:
             return render, 'register.html', {"register_errmsg": "注册失败"}
 
+        # 状态保持 JWT
+        # 将用户的id值存储到session中，会生成一个session存储到对应用户自己的浏览器cookie中
         login(request, user)
 
         # 跳转到首页
         return redirect(reverse('contents:index'))
 
+
+class UsernameCountView(View):
+    """判断用户名是否重复"""
+
+    def get(self, request, username):
+        # 从数据库查询当前username是否重复
+        count = User.objects.filter(username=username).count()
+        # 响应
+        return JsonResponse({"count": count})
+
+
+class MobileCountView(View):
+    """判断手机号是否重复"""
+    def get(self, request, mobile):
+        # 从数据库查询当前username是否重复
+        count = User.objects.filter(mobile=mobile).count()
+        # 响应
+        return JsonResponse({"count": count})
