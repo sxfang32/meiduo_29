@@ -40,7 +40,7 @@ class SMSCodeView(View):
 
         # 创建redis连接对象
         redis_conn = get_redis_connection('verify_codes')
-        # 将redis中的图形验证码字符串获取出来,s
+        # 将redis中的图形验证码字符串获取出来.
         image_code_server_bytes = redis_conn.get(uuid)
         # 图形验证码从redis获取出来之后就从Redis数据库中删除:让图形验证码只能用一次
         redis_conn.delete(uuid)
