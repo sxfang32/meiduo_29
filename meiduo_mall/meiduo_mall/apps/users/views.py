@@ -18,11 +18,13 @@ class RegisterView(View):
     def post(self, request):
         """用户注册逻辑"""
         # 接收请求体中的表单数据
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        password2 = request.POST.get('password2')
-        mobile = request.POST.get('mobile')
-        allow = request.POST.get('allow')
+        query_dict = request.POST
+        username = query_dict.get('username')
+        password = query_dict.get('password')
+        password2 = query_dict.get('password2')
+        mobile = query_dict.get('mobile')
+        sms_code =query_dict.get('sms_code')
+        allow = query_dict.get('allow')
         # 校验数据
         if not all([username, password, password2, mobile, allow]):
             return HttpResponseForbidden('参数不全，请重新输入')
@@ -34,9 +36,12 @@ class RegisterView(View):
             return HttpResponseForbidden('两次输入的密码不一致')
         if not re.match(r'^1[3-9]\d{9}$', mobile):
             return HttpResponseForbidden('您输入的手机号格式不正确')
+
+        # TODO:短信验证码校验后期补充
+
         # 使用表单提交，如果勾选了checkbox选项，会自动带上allow : on
-        if allow != 'on':
-            return HttpResponseForbidden('请勾选用户协议')
+        # if allow != 'on':
+        #     return HttpResponseForbidden('请勾选用户协议')
         # 新增用户记录
         try:
             user = User.objects.create_user(username=username, password=password, mobile=mobile)
