@@ -20,4 +20,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('users.urls', namespace='users')),    # 用户模块
     url(r'^', include('contents.urls', namespace='contents')),
+    url(r'^', include('verifications.urls'))
 ]

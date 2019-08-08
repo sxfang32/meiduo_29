@@ -26,7 +26,7 @@ class RegisterView(View):
         sms_code = query_dict.get('sms_code')
         allow = query_dict.get('allow')
         # 校验数据
-        if not all([username, password, password2, mobile, allow]):
+        if  all([username, password, password2, mobile, allow]) is False:
             return HttpResponseForbidden('参数不全，请重新输入')
         if not re.match(r'^[a-zA-Z0-9_-]{5,20}$', username):
             return HttpResponseForbidden('请输入5-20个字符的用户名')
@@ -73,3 +73,6 @@ class MobileCountView(View):
         count = User.objects.filter(mobile=mobile).count()
         # 响应
         return JsonResponse({"count": count})
+
+
+
