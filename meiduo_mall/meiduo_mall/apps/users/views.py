@@ -144,7 +144,6 @@ class LoginView(View):
         # 2.校验
 
         user = authenticate(request, username=username, password=password)
-
         # 如果登录失败
         if user is None:
             return render(request, 'login.html', {'account_errmsg':'用户名或密码错误'})
@@ -157,7 +156,9 @@ class LoginView(View):
         if remembered is None:
             request.session.set_expiry(0)  # 是指session的过期时间为，关闭浏览器过期
         # 4。重定向
-        response = redirect('/')  # 创建响应对象
+
+        next = request.GET.get('next')   # 尝试去获取查询参数中是否有用户界面的来源，如果有来源，成功登录后跳转到来源界面
+        response = redirect(next or '/')  # 创建响应对象
         # 给cookie设置username
         response.set_cookie('username', username, max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
         return response
@@ -172,5 +173,16 @@ class LogoutView(View):
         # 2.清除cookie中的username
         response = redirect('/login/')
         response.delete_cookie('username')   # 其实本质就是set_cookie(max_age=0)
+
         # 3.重定向到login界面
         return response
+
+
+class InfoView(View):
+    """用户中心"""
+    def get(self, request):
+        # 如果当前是登录用户，直接响应用户中心页面
+        if request.user.is_authenticated:
+            return render(request, 'user_center_info.html')
+        else:
+            return redirect('/login/?next=/info/')
