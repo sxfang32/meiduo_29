@@ -205,3 +205,5 @@ LOGGING = {
 AUTH_USER_MODEL = 'users.User'
 # 指定登录认证类
 AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileAuthBackend']
+
+LOGIN_URL = '/login/'

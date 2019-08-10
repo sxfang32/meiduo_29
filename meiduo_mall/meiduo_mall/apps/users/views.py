@@ -1,4 +1,4 @@
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout, mixins
 from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.views import View
@@ -29,7 +29,7 @@ class RegisterView(View):
         sms_code = query_dict.get('sms_code')
         allow = query_dict.get('allow')
         # 校验数据
-        if  all([username, password, password2, mobile, allow]) is False:
+        if all([username, password, password2, mobile, allow]) is False:
             return http.HttpResponseForbidden('参数不全，请重新输入')
         if not re.match(r'^[a-zA-Z0-9_-]{5,20}$', username):
             return http.HttpResponseForbidden('请输入5-20个字符的用户名')
@@ -55,7 +55,6 @@ class RegisterView(View):
         # 判断时要注意字典大小写问题
         if sms_code != sms_code_server():
             return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码输入错误'})
-
 
         # 使用表单提交，如果勾选了checkbox选项，会自动带上allow : on
         # if allow != 'on':
@@ -146,7 +145,7 @@ class LoginView(View):
         user = authenticate(request, username=username, password=password)
         # 如果登录失败
         if user is None:
-            return render(request, 'login.html', {'account_errmsg':'用户名或密码错误'})
+            return render(request, 'login.html', {'account_errmsg': '用户名或密码错误'})
         # 3.状态保持
         login(request, user)
 
@@ -157,7 +156,7 @@ class LoginView(View):
             request.session.set_expiry(0)  # 是指session的过期时间为，关闭浏览器过期
         # 4。重定向
 
-        next = request.GET.get('next')   # 尝试去获取查询参数中是否有用户界面的来源，如果有来源，成功登录后跳转到来源界面
+        next = request.GET.get('next')  # 尝试去获取查询参数中是否有用户界面的来源，如果有来源，成功登录后跳转到来源界面
         response = redirect(next or '/')  # 创建响应对象
         # 给cookie设置username
         response.set_cookie('username', username, max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
@@ -166,23 +165,28 @@ class LoginView(View):
 
 class LogoutView(View):
     """退出登录"""
+
     def get(self, request):
         # 1.清除状态保持
         logout(request)
 
         # 2.清除cookie中的username
         response = redirect('/login/')
-        response.delete_cookie('username')   # 其实本质就是set_cookie(max_age=0)
+        response.delete_cookie('username')  # 其实本质就是set_cookie(max_age=0)
 
         # 3.重定向到login界面
         return response
 
 
-class InfoView(View):
-    """用户中心"""
+# class InfoView(View):
+#     """用户中心"""
+#     def get(self, request):
+#         # 如果当前是登录用户，直接响应用户中心页面
+#         if request.user.is_authenticated:
+#             return render(request, 'user_center_info.html')
+#         else:
+#             return redirect('/login/?next=/info/')
+
+class InfoView(mixins.LoginRequiredMixin, View):
     def get(self, request):
-        # 如果当前是登录用户，直接响应用户中心页面
-        if request.user.is_authenticated:
-            return render(request, 'user_center_info.html')
-        else:
-            return redirect('/login/?next=/info/')
+        return render(request, 'user_center_info.html')
