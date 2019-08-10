@@ -117,6 +117,11 @@ class LoginView(View):
             return render(request, 'login.html', {'account_errmsg':'用户名或密码错误'})
         # 3.状态保持
         login(request, user)
+        # 如果用户没有勾选记住登录
+        # 如果session过期时间设置为None，表示使用默认的14天，如果设置为0，代表关闭浏览器失效
+        # 如果cookie过期时间设置为None，表示关闭浏览器局过去，如果设置为0，代表直接删除
+        if remembered != 'on':
+            request.session.set_expiry(0)  # 是指session的过期时间为，关闭浏览器过期
         # 4。重定向
         return http.HttpResponse('登录成功')
 
