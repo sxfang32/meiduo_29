@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -70,9 +70,9 @@ class RegisterView(View):
         login(request, user)
 
         # 跳转到首页
-        response = redirect(reverse('contents:index'))
-        response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
-        return response
+        # response = redirect(reverse('contents:index'))
+        # response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
+        return http.HttpResponse('注册成功')
 
 
 class UsernameCountView(View):
@@ -102,5 +102,22 @@ class LoginView(View):
         """提供登录的界面"""
         return render(request, 'login.html')
 
+    def post(self, request):
+        """登录功能逻辑"""
+        # 1.接收请求体表单数据
+        query_dict = request.POST
+        username = query_dict.get('username')
+        password = query_dict.get('password')
+        remembered = query_dict.get('remembered')
+
+        # 2.校验
+        user = authenticate(request, username=username, password=password)
+        # 如果登录失败
+        if user is None:
+            return render(request, 'login.html', {'account_errmsg':'用户名或密码错误'})
+        # 3.状态保持
+        login(request, user)
+        # 4。重定向
+        return http.HttpResponse('登录成功')
 
 
