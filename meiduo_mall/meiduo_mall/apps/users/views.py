@@ -1,14 +1,15 @@
 from django.contrib.auth import login, authenticate
 from django.db import DatabaseError
 from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.views import View
 from django import http
+from django.conf import settings
+import re
+from django_redis import get_redis_connection
 
 from meiduo_mall.utils.response_code import RETCODE
 from .models import *
-import re
-from django_redis import get_redis_connection
+
 
 class RegisterView(View):
     """用户注册"""
@@ -70,9 +71,9 @@ class RegisterView(View):
         login(request, user)
 
         # 跳转到首页
-        # response = redirect(reverse('contents:index'))
-        # response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
-        return http.HttpResponse('注册成功')
+        response = redirect('/')
+        response.set_cookie('username', username, max_age=settings.SESSION_COOKIE_AGE)
+        return response
 
 
 class UsernameCountView(View):
@@ -102,6 +103,36 @@ class LoginView(View):
         """提供登录的界面"""
         return render(request, 'login.html')
 
+    """
+    def post(self, request):
+        '''登录功能逻辑'''
+        # 1.接收请求体表单数据
+        query_dict = request.POST
+        username = query_dict.get('username')
+        password = query_dict.get('password')
+        remembered = query_dict.get('remembered')
+
+        # 2.校验
+        if re.match(r'^1[3-9]\d{9}$', username):
+            User.USERNAME_FIELD = 'mobile'
+
+        user = authenticate(request, username=username, password=password)
+        User.USERNAME_FIELD = 'username'
+
+        # 如果登录失败
+        if user is None:
+            return render(request, 'login.html', {'account_errmsg':'用户名或密码错误'})
+        # 3.状态保持
+        login(request, user)
+        # 如果用户没有勾选记住登录
+        # 如果session过期时间设置为None，表示使用默认的14天，如果设置为0，代表关闭浏览器失效
+        # 如果cookie过期时间设置为None，表示关闭浏览器局过去，如果设置为0，代表直接删除
+        if remembered is None:
+            request.session.set_expiry(0)  # 是指session的过期时间为，关闭浏览器过期
+        # 4。重定向
+        return redirect('/')
+    """
+
     def post(self, request):
         """登录功能逻辑"""
         # 1.接收请求体表单数据
@@ -111,18 +142,22 @@ class LoginView(View):
         remembered = query_dict.get('remembered')
 
         # 2.校验
+
         user = authenticate(request, username=username, password=password)
+
         # 如果登录失败
         if user is None:
             return render(request, 'login.html', {'account_errmsg':'用户名或密码错误'})
         # 3.状态保持
         login(request, user)
+
         # 如果用户没有勾选记住登录
         # 如果session过期时间设置为None，表示使用默认的14天，如果设置为0，代表关闭浏览器失效
         # 如果cookie过期时间设置为None，表示关闭浏览器局过去，如果设置为0，代表直接删除
-        if remembered != 'on':
+        if remembered is None:
             request.session.set_expiry(0)  # 是指session的过期时间为，关闭浏览器过期
         # 4。重定向
-        return http.HttpResponse('登录成功')
-
-
+        response = redirect('/')  # 创建响应对象
+        # 给cookie设置username
+        response.set_cookie('username', username, max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
+        return response

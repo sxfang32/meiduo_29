@@ -3,7 +3,7 @@ from django.views import View
 
 
 class IndexView(View):
-    """首页广告"""
+    """展示首页"""
 
     def get(self, request):
         """提供首页广告界面"""
