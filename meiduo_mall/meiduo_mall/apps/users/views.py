@@ -70,7 +70,9 @@ class RegisterView(View):
         login(request, user)
 
         # 跳转到首页
-        return redirect(reverse('contents:index'))
+        response = redirect(reverse('contents:index'))
+        response.set_cookie('username', user.username, max_age=3600 * 24 * 14)
+        return response
 
 
 class UsernameCountView(View):
