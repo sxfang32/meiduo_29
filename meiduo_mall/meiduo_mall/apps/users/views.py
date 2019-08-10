@@ -1,4 +1,4 @@
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.views import View
@@ -160,4 +160,17 @@ class LoginView(View):
         response = redirect('/')  # 创建响应对象
         # 给cookie设置username
         response.set_cookie('username', username, max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
+        return response
+
+
+class LogoutView(View):
+    """退出登录"""
+    def get(self, request):
+        # 1.清除状态保持
+        logout(request)
+
+        # 2.清除cookie中的username
+        response = redirect('/login/')
+        response.delete_cookie('username')   # 其实本质就是set_cookie(max_age=0)
+        # 3.重定向到login界面
         return response
