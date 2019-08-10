@@ -95,4 +95,12 @@ class MobileCountView(View):
         return http.JsonResponse({"count": count})
 
 
+class LoginView(View):
+    """用户登录"""
+
+    def get(self, request):
+        """提供登录的界面"""
+        return render(request, 'login.html')
+
+
 
