@@ -7,6 +7,7 @@ from django.contrib.auth import login
 from QQLoginTool.QQtool import OAuthQQ
 from meiduo_mall.utils.response_code import RETCODE
 from oauth.models import OAuthQQUser
+from .utils import generate_openid_signature
 
 import logging
 
@@ -62,7 +63,7 @@ class QQAuthUserView(View):
             auth_model = OAuthQQUser.objects.get(openid=openid)
         except OAuthQQUser.DoesNotExist:
             # 如果不存在，说明openID还没有绑定美多中的用户，应该去绑定
-            context = {'openid': openid}
+            context = {'openid': generate_openid_signature(openid)}
             return render(request, 'oauth_callback.html', context)
 
         else:
@@ -75,3 +76,18 @@ class QQAuthUserView(View):
             response.set_cookie('username', user.username, max_age=settings.SSIONSE_COOKIE_AGE)
             # 重定向到指定的来源页
             return response
+
+    def post(self, request):
+        """openID绑定用户逻辑"""
+        # 接收表单数据
+
+        # 校验
+
+        # 新增oauth_qq表的一个记录
+
+        # 绑定完成即代表登录成功
+
+        # 状态保持
+        # 将username保存到cookie中
+
+        pass
