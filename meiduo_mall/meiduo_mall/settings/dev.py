@@ -28,7 +28,7 @@ SECRET_KEY = 'enh#zx8+1+1^j#h@z7(*xy5vs^-hwaijq0wyd-eh&l#lfh$31$'
 # 默认开启调试模式：代码修改会自动重启，只有调试模式Django才提供静态文件访问支持
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.meiduo.site', '127.0.0.1']
+ALLOWED_HOSTS = ['www.meiduo.site']
 
 # Application definition
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 只有当应用中用到模型需求迁移建表， 或应用中使用了模板时才需要注册，如果应用中只有视图和路由这些代码，应用可以不用注册。
     'users.apps.UsersConfig',
+    'oauth.apps.OauthConfig',
 ]
 
 MIDDLEWARE = [
