@@ -28,7 +28,7 @@ SECRET_KEY = 'enh#zx8+1+1^j#h@z7(*xy5vs^-hwaijq0wyd-eh&l#lfh$31$'
 # 默认开启调试模式：代码修改会自动重启，只有调试模式Django才提供静态文件访问支持
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.meiduo.site']
+ALLOWED_HOSTS = ['www.meiduo.site', '127.0.0.1']
 
 # Application definition
 
@@ -207,3 +207,7 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileAuthBackend']
 
 LOGIN_URL = '/login/'
+
+QQ_CLIENT_ID = '101518219'
+QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'
