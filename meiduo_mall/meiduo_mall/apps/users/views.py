@@ -43,7 +43,7 @@ class RegisterView(View):
         # 短信验证码校验
         # 创建redis连接对象
         redis_conn = get_redis_connection('verify_codes')
-        # 将redis中的短信验证码字符串获取出来,s
+        # 将redis中的短信验证码字符串获取出来
         sms_code_server_bytes = redis_conn.get('sms_%s' % mobile)
         # 短信验证码从redis获取出来之后就从Redis数据库中删除:让图形验证码只能用一次
         redis_conn.delete('sms_%s' % mobile)
@@ -52,7 +52,7 @@ class RegisterView(View):
             return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码错误'})
         # 从redis获取出来的数据注意数据类型问题byte
         sms_code_server = sms_code_server_bytes.decode()
-        # 判断时要注意字典大小写问题
+        # 判断短信验证码是否相等
         if sms_code != sms_code_server():
             return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码输入错误'})
 
@@ -71,7 +71,7 @@ class RegisterView(View):
 
         # 跳转到首页
         response = redirect('/')
-        response.set_cookie('username', username, max_age=settings.SESSION_COOKIE_AGE)
+        response.set_cookie('username', user.username, max_age=settings.SESSION_COOKIE_AGE)
         return response
 
 
@@ -102,36 +102,6 @@ class LoginView(View):
         """提供登录的界面"""
         return render(request, 'login.html')
 
-    """
-    def post(self, request):
-        '''登录功能逻辑'''
-        # 1.接收请求体表单数据
-        query_dict = request.POST
-        username = query_dict.get('username')
-        password = query_dict.get('password')
-        remembered = query_dict.get('remembered')
-
-        # 2.校验
-        if re.match(r'^1[3-9]\d{9}$', username):
-            User.USERNAME_FIELD = 'mobile'
-
-        user = authenticate(request, username=username, password=password)
-        User.USERNAME_FIELD = 'username'
-
-        # 如果登录失败
-        if user is None:
-            return render(request, 'login.html', {'account_errmsg':'用户名或密码错误'})
-        # 3.状态保持
-        login(request, user)
-        # 如果用户没有勾选记住登录
-        # 如果session过期时间设置为None，表示使用默认的14天，如果设置为0，代表关闭浏览器失效
-        # 如果cookie过期时间设置为None，表示关闭浏览器局过去，如果设置为0，代表直接删除
-        if remembered is None:
-            request.session.set_expiry(0)  # 是指session的过期时间为，关闭浏览器过期
-        # 4。重定向
-        return redirect('/')
-    """
-
     def post(self, request):
         """登录功能逻辑"""
         # 1.接收请求体表单数据
@@ -141,7 +111,6 @@ class LoginView(View):
         remembered = query_dict.get('remembered')
 
         # 2.校验
-
         user = authenticate(request, username=username, password=password)
         # 如果登录失败
         if user is None:
@@ -151,15 +120,15 @@ class LoginView(View):
 
         # 如果用户没有勾选记住登录
         # 如果session过期时间设置为None，表示使用默认的14天，如果设置为0，代表关闭浏览器失效
-        # 如果cookie过期时间设置为None，表示关闭浏览器局过去，如果设置为0，代表直接删除
+        # 如果cookie过期时间设置为None，表示关闭浏览器就过期，如果设置为0，代表直接删除
         if remembered is None:
-            request.session.set_expiry(0)  # 是指session的过期时间为，关闭浏览器过期
-        # 4。重定向
+            request.session.set_expiry(0)  # 是指session的过期时间为关闭浏览器过期
+        # 4.重定向
 
         next = request.GET.get('next')  # 尝试去获取查询参数中是否有用户界面的来源，如果有来源，成功登录后跳转到来源界面
         response = redirect(next or '/')  # 创建响应对象
         # 给cookie设置username
-        response.set_cookie('username', username, max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
+        response.set_cookie('username', user.username, max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
         return response
 
 
@@ -172,7 +141,7 @@ class LogoutView(View):
 
         # 2.清除cookie中的username
         response = redirect('/login/')
-        response.delete_cookie('username')  # 其实本质就是set_cookie(max_age=0)
+        response.delete_cookie('username')  # 其实delete_cookie本质就是set_cookie(max_age=0)
 
         # 3.重定向到login界面
         return response
@@ -188,5 +157,6 @@ class LogoutView(View):
 #             return redirect('/login/?next=/info/')
 
 class InfoView(mixins.LoginRequiredMixin, View):
+    """用户中心页面展示"""
     def get(self, request):
         return render(request, 'user_center_info.html')
