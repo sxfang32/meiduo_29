@@ -43,9 +43,16 @@ class QQAuthUserView(View):
         auth_qq = OAuthQQ(client_id=settings.QQ_CLIENT_ID,
                           client_secret=settings.QQ_CLIENT_SECRET,
                           redirect_uri=settings.QQ_REDIRECT_URI)
-        # 调用get_access_token
-        access_token = auth_qq.get_access_token(code)
-        # 调用get_openid
-        openid = auth_qq.get_open_id(code)
+        try:
+            # 调用get_access_token
+            access_token = auth_qq.get_access_token(code)
+            # 调用get_openid
+            openid = auth_qq.get_open_id(access_token)
+        except Exception as e:
+            logging.info(e)
+            return http.JsonResponse({'code': RETCODE.SERVERERR, 'errmsg': 'OAuth2.0认证失败'})
 
+        # 去数据库中查询openID是否存在
+        # 如果不存在，说明openID还没有绑定美多中的用户，应该去绑定
+        # 如果存在，说明openID之前已经绑定过美多用户，那么直接代表登录成功
         pass
