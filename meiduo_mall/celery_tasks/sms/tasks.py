@@ -3,7 +3,7 @@ from celery_tasks.sms.yuntongxun.sms import CCP
 from celery_tasks.main import celery_app
 
 
-@celery_app.task()      # 只有用此装饰器装饰过的函数才能成为celery任务
+@celery_app.task(name='send_sms_code')      # 只有用此装饰器装饰过的函数才能成为celery任务
 def send_sms_code(mobile, sms_code):
     """
     发短信的异步任务

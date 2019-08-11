@@ -68,6 +68,7 @@ class SMSCodeView(View):
         pl.setex('sms_%s' % mobile, IMAGE_CODE_EXPIRE, sms_code)
 
         # 当手机号发过了验证码，向Redis存储一个发送过的标记
+        # 可能存在没存进去的问题，这时候可以使用ttl获取一下那个300秒的验证码，时间够不够300-60秒
         pl.setex('send_flag_%s' % mobile, SEND_SMS_TIME, 1)
 
         # 执行管道
