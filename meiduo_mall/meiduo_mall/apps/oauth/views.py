@@ -61,8 +61,10 @@ class QQAuthUserView(View):
             # 去数据库中查询openID是否存在
             auth_model = OAuthQQUser.objects.get(openid=openid)
         except OAuthQQUser.DoesNotExist:
-            pass
             # 如果不存在，说明openID还没有绑定美多中的用户，应该去绑定
+            context = {'openid': openid}
+            return render(request, 'oauth_callback.html', context)
+
         else:
             # 如果存在，说明openID之前已经绑定过美多用户，那么直接代表登录成功
             user = auth_model.user
