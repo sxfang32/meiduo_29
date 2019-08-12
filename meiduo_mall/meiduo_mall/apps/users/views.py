@@ -53,7 +53,7 @@ class RegisterView(View):
         # 从redis获取出来的数据注意数据类型问题byte
         sms_code_server = sms_code_server_bytes.decode()
         # 判断短信验证码是否相等
-        if sms_code != sms_code_server():
+        if sms_code != sms_code_server:
             return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码输入错误'})
 
         # 使用表单提交，如果勾选了checkbox选项，会自动带上allow : on

@@ -1,4 +1,4 @@
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer,BadData
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadData
 from django.conf import settings
 
 
@@ -7,7 +7,7 @@ def generate_openid_signature(openid):
     # 1.创建加密的实例对象
     serializer = Serializer(settings.SECRET_KEY, 600)
     # 2.调用dumps方法进行加密，返回bytes类型
-    data = {'openid':openid}
+    data = {'openid': openid}
     openid_sign = serializer.dumps(data)
     # 3.返回
     return openid_sign.decode()

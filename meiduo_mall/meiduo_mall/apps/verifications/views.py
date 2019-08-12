@@ -61,6 +61,7 @@ class SMSCodeView(View):
         # 发送短信验证码
         # 生成随机数作为短信验证码
         sms_code = '%06d' % random.randint(0, 999999)
+        print(sms_code)
         # 创建Redis管道
         pl = redis_conn.pipeline()
         # 将短信验证码存储到redis，key为了保持唯一，统一sms_手机号格式

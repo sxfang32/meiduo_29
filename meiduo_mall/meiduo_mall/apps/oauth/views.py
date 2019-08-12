@@ -1,3 +1,4 @@
+from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.views import View
@@ -5,6 +6,7 @@ from django import http
 from django.contrib.auth import login
 import re
 from django_redis import get_redis_connection
+
 from QQLoginTool.QQtool import OAuthQQ
 from meiduo_mall.utils.response_code import RETCODE
 from oauth.models import OAuthQQUser
@@ -74,7 +76,7 @@ class QQAuthUserView(View):
             login(request, user)
             # 向cookie存储username
             response = redirect(request.GET.get('state') or '/')
-            response.set_cookie('username', user.username, max_age=settings.SSIONSE_COOKIE_AGE)
+            response.set_cookie('username', user.username, max_age=settings.SESSION_COOKIE_AGE)
             # 重定向到指定的来源页
             return response
 
@@ -89,8 +91,10 @@ class QQAuthUserView(View):
         # 校验数据
         if all([mobile, password, sms_code, openid_sign]) is False:
             return http.HttpResponseForbidden('参数不全，请重新输入')
+
         if not re.match(r'^1[3-9]\d{9}$', mobile):
             return http.HttpResponseForbidden('请输入5-20个字符的用户名')
+
         if not re.match(r'^[a-zA-Z0-9]{8,20}$', password):
             return http.HttpResponseForbidden('请输入8-20位的密码')
 
@@ -107,7 +111,7 @@ class QQAuthUserView(View):
         # 从redis获取出来的数据注意数据类型问题byte
         sms_code_server = sms_code_server_bytes.decode()
         # 判断短信验证码是否相等
-        if sms_code != sms_code_server():
+        if sms_code != sms_code_server:
             return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码输入错误'})
 
         # 对openID进行解密
@@ -118,15 +122,17 @@ class QQAuthUserView(View):
             # 以mobile字段进行查询user表
             # 如果查到了，说明此手机号在美多商城之前已经注册，老用户
             user = User.objects.get(mobile=mobile)
+            if user.check_password(password) is False:
+                return http.HttpResponseForbidden('绑定的用户信息填写不正确')
         except User.DoesNotExist:
             # 如果没有查询到，说明此手机号时新的，创建一个新的user
-            User.objects.create_user(username=mobile, password=password, mobile=mobile)
+            user = User.objects.create_user(username=mobile, password=password, mobile=mobile)
 
         # 新增oauth_qq表的一个记录
         try:
             OAuthQQUser.objects.create(user=user, openid=openid)
-        except:
-            return render(request, 'oauth_callback.html', {'qq_login_errmsg':'QQ登录失败'})
+        except DatabaseError:
+            return render(request, 'oauth_callback.html', {'qq_login_errmsg': 'QQ登录失败'})
         # 绑定完成即代表登录成功
         # 状态保持
         login(request, user)
