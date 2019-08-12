@@ -93,7 +93,7 @@ class QQAuthUserView(View):
             return http.HttpResponseForbidden('参数不全，请重新输入')
 
         if not re.match(r'^1[3-9]\d{9}$', mobile):
-            return http.HttpResponseForbidden('请输入5-20个字符的用户名')
+            return http.HttpResponseForbidden('手机号码格式不正确')
 
         if not re.match(r'^[a-zA-Z0-9]{8,20}$', password):
             return http.HttpResponseForbidden('请输入8-20位的密码')
