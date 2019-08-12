@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import login, authenticate, logout, mixins
 from django.db import DatabaseError
 from django.shortcuts import render, redirect
@@ -128,7 +130,8 @@ class LoginView(View):
         next = request.GET.get('next')  # 尝试去获取查询参数中是否有用户界面的来源，如果有来源，成功登录后跳转到来源界面
         response = redirect(next or '/')  # 创建响应对象
         # 给cookie设置username
-        response.set_cookie('username', user.username, max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
+        response.set_cookie('username', user.username,
+                            max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
         return response
 
 
@@ -158,5 +161,37 @@ class LogoutView(View):
 
 class InfoView(mixins.LoginRequiredMixin, View):
     """用户中心页面展示"""
+
     def get(self, request):
-        return render(request, 'user_center_info.html')
+        """提供个人信息界面"""
+        content = {
+            'username': request.user.username,
+            'mobile': request.user.mobile,
+            'email': request.user.email,
+            'email_active': request.user.email_active
+        }
+        return render(request, 'user_center_info.html', content)
+
+
+class EmailView(View):
+    """添加邮箱功能"""
+
+    def put(self, request):
+        # 接收前端数据
+        json_dict = json.loads(request.body.decode())
+        email = json_dict.get('email')
+
+        # 校验数据
+        if not email:
+            return http.JsonResponse({'code': RETCODE.NECESSARYPARAMERR, 'errmsg': '缺少email参数'})
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.JsonResponse({'code': RETCODE.EMAILERR, 'errmsg': '邮箱格式错误'})
+        # 业务逻辑实现
+        # 获取登录用户
+        user = request.user
+        # 修改email
+        User.objects.filter(username=user.username, email='').update(email=email)
+        # 发送邮件
+        # TODO 发送邮件的配置稍后
+        # 响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'添加邮箱成功'})
