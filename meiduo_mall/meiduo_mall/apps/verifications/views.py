@@ -10,6 +10,7 @@ from . import constants
 from meiduo_mall.utils.response_code import RETCODE
 from celery_tasks.sms.tasks import send_sms_code
 
+
 class ImageCodeView(View):
     """图形验证码"""
 
@@ -76,7 +77,7 @@ class SMSCodeView(View):
         pl.execute()
 
         # 利用容联云平台进行发送短信
-        send_sms_code.delay(mobile, sms_code)   # 将发短信的函数内存添加到仓库中，让worker去新的线程执行
+        send_sms_code.delay(mobile, sms_code)  # 将发短信的函数内存添加到仓库中，让worker去新的线程执行
 
         # 响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
