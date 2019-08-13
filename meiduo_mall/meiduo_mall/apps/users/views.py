@@ -13,6 +13,7 @@ from django_redis import get_redis_connection
 from meiduo_mall.utils.response_code import RETCODE
 from .models import *
 from meiduo_mall.utils.views import LoginRequiredView
+from celery_tasks.email.tasks import send_verify_email
 
 
 class RegisterView(View):
@@ -203,6 +204,7 @@ class EmailView(LoginRequiredView):
         #           from_email='美多商城<itcast99@163.com>', # 发件人
         #           recipient_list=[email],
         #           html_message="<a href='http://www.itcast.cn''>传智<a>")
-
+        verify_url = 'https://www.baidu.com'
+        send_verify_email.delay(email, 0)
         # 响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'添加邮箱成功'})
