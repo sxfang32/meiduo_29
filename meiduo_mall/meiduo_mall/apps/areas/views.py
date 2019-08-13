@@ -25,7 +25,25 @@ class AreasView(View):
                 })
             return http.JsonResponse({"code": RETCODE.OK, 'errmsg': 'OK', 'province_list': province_list})
         else:
-            # 如果有，就是要查询指定id的下级所有行政区
+            # 如果有area_id，就是要查询指定id的下级所有行政区
             # 查询下级行政区
-            pass
-        pass
+            parent_model = Area.objects.get(id=area_id)
+            # 通过上级查询出所有下级行政区
+            sub_qs = parent_model.subs.all()
+
+            sub_list = []  # 用来装所有下级行政区
+            for sub_model in sub_qs:
+                sub_list.append({
+                    'id': sub_model.id,
+                    'name': sub_model.name
+                })
+
+                # 定义字典变量，包装前端需要的数据
+            sub_data = {
+                'id': parent_model.id,
+                'name': parent_model.name,
+                'subs': sub_list
+            }
+
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'sub_data': sub_data})
+
