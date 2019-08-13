@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth import login, authenticate, logout, mixins
+from django.core.mail import send_mail
 from django.db import DatabaseError
 from django.shortcuts import render, redirect
 from django.views import View
@@ -187,13 +188,21 @@ class EmailView(LoginRequiredView):
         if not email:
             return http.JsonResponse({'code': RETCODE.NECESSARYPARAMERR, 'errmsg': '缺少email参数'})
         if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
-            return http.JsonResponse({'code': RETCODE.EMAILERR, 'errmsg': '邮箱格式错误'})
+            # return http.JsonResponse({'code': RETCODE.EMAILERR, 'errmsg': '邮箱格式错误'})
+            return http.HttpResponseForbidden('邮箱格式不正确')
         # 业务逻辑实现
         # 获取当前登录用户user
         user = request.user
+
         # 修改email
         User.objects.filter(username=user.username, email='').update(email=email)
+
         # 发送邮件
-        # TODO 发送邮件的配置稍后
+        # send_mail(subject='美多商城', # 邮件主题
+        #           message='邮件普通内容', # 邮件普通内容
+        #           from_email='美多商城<itcast99@163.com>', # 发件人
+        #           recipient_list=[email],
+        #           html_message="<a href='http://www.itcast.cn''>传智<a>")
+
         # 响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'添加邮箱成功'})
