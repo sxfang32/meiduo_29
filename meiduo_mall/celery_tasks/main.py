@@ -1,5 +1,9 @@
 # celery 程序启动文件，也是客户创建
 from celery import Celery
+import os
+
+if not os.getenv('DJANGO_SETTINGS_MODULE'):
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'meiduo_mall.settings.dev'
 
 # 1.创建celery实例对象
 celery_app = Celery('meiduo')
