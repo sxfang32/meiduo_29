@@ -14,7 +14,7 @@ from meiduo_mall.utils.response_code import RETCODE
 from .models import *
 from meiduo_mall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
-
+from .utils import generate_email_verify_url
 
 class RegisterView(View):
     """用户注册"""
@@ -204,7 +204,8 @@ class EmailView(LoginRequiredView):
         #           from_email='美多商城<itcast99@163.com>', # 发件人
         #           recipient_list=[email],
         #           html_message="<a href='http://www.itcast.cn''>传智<a>")
-        verify_url = 'http://www.meiduo.site:8000/verify_email?token='
+        # verify_url = 'http://www.meiduo.site:8000/verify_email?token='
+        verify_url = generate_email_verify_url(request.user)
         send_verify_email.delay(email, verify_url)
         # 响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'添加邮箱成功'})

@@ -1,6 +1,7 @@
 from django.contrib.auth.backends import ModelBackend
 import re
-
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from django.conf import settings
 from .models import User
 
 
@@ -22,6 +23,7 @@ def get_user_by_account(account):
 
 
 class UsernameMobileAuthBackend(ModelBackend):
+
     """自定义登录认证后端类"""
 
     def authenticate(self, request, username=None, password=None, **kwargs):
@@ -31,3 +33,16 @@ class UsernameMobileAuthBackend(ModelBackend):
         if user and user.check_password(password):
             # 3.返回user或None
             return user
+
+
+def generate_email_verify_url(user):
+    """拿到用户信息进行加密并拼接激活url"""
+    serializer = Serializer(settings.SECRET_KEY, 3600 * 24)
+
+    data  = {'user_id': user.id, 'email': user.email}
+
+    token = serializer.dumps(data).decode()
+
+    verify_url = settings.EMAIL_VERIFY_URL + '?token' + token
+
+    return verify_url
