@@ -11,6 +11,7 @@ from django_redis import get_redis_connection
 
 from meiduo_mall.utils.response_code import RETCODE
 from .models import *
+from meiduo_mall.utils.views import LoginRequiredView
 
 
 class RegisterView(View):
@@ -173,11 +174,12 @@ class InfoView(mixins.LoginRequiredMixin, View):
         return render(request, 'user_center_info.html', content)
 
 
-class EmailView(View):
+class EmailView(LoginRequiredView):
     """添加邮箱功能"""
 
     def put(self, request):
-        # 接收前端数据
+        """添加邮箱（本质是把空值改掉）"""
+        # 接收请求体中的数据
         json_dict = json.loads(request.body.decode())
         email = json_dict.get('email')
 
@@ -187,7 +189,7 @@ class EmailView(View):
         if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
             return http.JsonResponse({'code': RETCODE.EMAILERR, 'errmsg': '邮箱格式错误'})
         # 业务逻辑实现
-        # 获取登录用户
+        # 获取当前登录用户user
         user = request.user
         # 修改email
         User.objects.filter(username=user.username, email='').update(email=email)
