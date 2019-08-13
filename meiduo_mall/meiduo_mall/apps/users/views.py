@@ -14,7 +14,7 @@ from meiduo_mall.utils.response_code import RETCODE
 from .models import *
 from meiduo_mall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
-from .utils import generate_email_verify_url
+from .utils import generate_email_verify_url, check_email_verify_url
 
 class RegisterView(View):
     """用户注册"""
@@ -162,7 +162,7 @@ class LogoutView(View):
 #         else:
 #             return redirect('/login/?next=/info/')
 
-class InfoView(mixins.LoginRequiredMixin, View):
+class InfoView(LoginRequiredView):
     """用户中心页面展示"""
 
     def get(self, request):
@@ -196,16 +196,35 @@ class EmailView(LoginRequiredView):
         user = request.user
 
         # 修改email
-        User.objects.filter(username=user.username, email='').update(email=email)
+        User.objects.filter(username=user.username).update(email=email)
 
         # 发送邮件
         # send_mail(subject='美多商城', # 邮件主题
         #           message='邮件普通内容', # 邮件普通内容
         #           from_email='美多商城<itcast99@163.com>', # 发件人
-        #           recipient_list=[email],
-        #           html_message="<a href='http://www.itcast.cn''>传智<a>")
+        #           recipient_list=[email], # 收件人
+        #           html_message="<a href='http://www.itcast.cn''>传智<a>")  # 超文本内容
         # verify_url = 'http://www.meiduo.site:8000/verify_email?token='
         verify_url = generate_email_verify_url(request.user)
         send_verify_email.delay(email, verify_url)
         # 响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'添加邮箱成功'})
+
+
+class VerifyEmailView(View):
+    """激活邮箱"""
+    def get(self, request):
+        # 1.接收查询参数中的token
+        token = request.GET.get('token')
+        # 2.校验token
+        if token is None:
+            return http.HttpResponseForbidden('缺少token')
+
+        # 3.修改当前user的email_active为1
+        user = check_email_verify_url(token)
+        if user is None:
+            return http.HttpResponseForbidden('token无效')
+        user.email_active = True
+        user.save()
+        # 4.重定向到用户中心
+        return render(request, 'user_center_info.html')
