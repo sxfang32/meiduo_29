@@ -154,15 +154,6 @@ class LogoutView(View):
         return response
 
 
-# class InfoView(View):
-#     """用户中心"""
-#     def get(self, request):
-#         # 如果当前是登录用户，直接响应用户中心页面
-#         if request.user.is_authenticated:
-#             return render(request, 'user_center_info.html')
-#         else:
-#             return redirect('/login/?next=/info/')
-
 class InfoView(LoginRequiredView):
     """用户中心页面展示"""
 
