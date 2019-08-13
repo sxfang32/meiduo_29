@@ -16,6 +16,7 @@ from meiduo_mall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
 from .utils import generate_email_verify_url, check_email_verify_url
 
+
 class RegisterView(View):
     """用户注册"""
 
@@ -208,11 +209,12 @@ class EmailView(LoginRequiredView):
         verify_url = generate_email_verify_url(request.user)
         send_verify_email.delay(email, verify_url)
         # 响应
-        return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'添加邮箱成功'})
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
 
 
 class VerifyEmailView(View):
     """激活邮箱"""
+
     def get(self, request):
         # 1.接收查询参数中的token
         token = request.GET.get('token')
@@ -228,3 +230,11 @@ class VerifyEmailView(View):
         user.save()
         # 4.重定向到用户中心
         return render(request, 'user_center_info.html')
+
+
+class AdressesView(LoginRequiredView):
+    """用户收货地址"""
+
+    def get(self, request):
+        """展示用户收货地址"""
+        return render(request, 'user_center_site.html')
