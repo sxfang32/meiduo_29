@@ -238,7 +238,38 @@ class AdressesView(LoginRequiredView):
 
     def get(self, request):
         """展示用户收货地址"""
-        return render(request, 'user_center_site.html')
+
+        user = request.user
+
+        # 1.查询当前登录用户所有未被逻辑删除的收货地址
+        address_qs = Address.objects.filter(user=user, is_deleted=False)
+        # address_qs = user.addresses.filter(is_delete=False)
+        # 遍历查询集中每个address模型，转化成字典，并包装到列表中
+        addresses = []
+        for address in address_qs:
+            addresses.append(
+                {
+                    "id": address.id,
+                    "title": address.title,
+                    "receiver": address.receiver,
+                    "province_id": address.province_id,
+                    "province": address.province.name,
+                    "city_id": address.city_id,
+                    "city": address.city.name,
+                    "district_id": address.district_id,
+                    "district": address.district.name,
+                    "place": address.place,
+                    "mobile": address.mobile,
+                    "tel": address.tel,
+                    "email": address.email
+                }
+            )
+
+        context = {
+            'addresses' :addresses,
+            'default_address_id':user.default_address_id  # 获取道歉用户的默认收货地址ID
+        }
+        return render(request, 'user_center_site.html', context)
 
 
 class CreateAddressView(LoginRequiredView):
@@ -296,7 +327,7 @@ class CreateAddressView(LoginRequiredView):
         # 设置一个默认地址，判断如果没有默认地址，新增的这个就是默认地址
         if request.user.default_address is None:
             request.user.default_address = address
-            address.save()
+            request.user.default_address.save()
 
         # 新增地址成功，将新增的地址响应给前端实现局部刷新
         # 将新增的收货地址模型对象转换成字典响应给前端
