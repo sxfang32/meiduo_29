@@ -456,5 +456,37 @@ class UpdateDestroyAddressView(LoginRequiredView):
 class DefaultAddressView(LoginRequiredView):
     """设置默认地址"""
 
-    def put(self, request):
+    def put(self, request, address_id):
         """设置默认地址"""
+
+        # 校验要设置的地址是否存在
+        try:
+            address = Address.objects.get(id=address_id,user=request.user, is_deleted=False)
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '设置默认地址失败'})
+        # 获取当前user
+        user = request.user
+        user.default_address = address
+        user.save()
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '设置默认地址成功'})
+
+class UpdateTitleAddressView(LoginRequiredView):
+    """修改标题"""
+    def put(self, request, address_id):
+        """修改标题"""
+        try:
+            address = Address.objects.get(id=address_id,user=request.user, is_deleted=False)
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '修改地址标题失败'})
+
+        json_dict = json.loads(request.body.decode())
+        title = json_dict.get('title')
+        if title is None:
+            return http.HttpResponseForbidden('缺少必传参数')
+        address.title = title
+        address.save()
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '修改标题成功'})
