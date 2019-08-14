@@ -41,9 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 只有当应用中用到模型需求迁移建表， 或应用中使用了模板时才需要注册，如果应用中只有视图和路由这些代码，应用可以不用注册。
-    'users.apps.UsersConfig',
-    'oauth.apps.OauthConfig',
-    'areas.apps.AreasConfig'
+    'users.apps.UsersConfig',  # 用户模块
+    'oauth.apps.OauthConfig',  # QQ模块
+    'areas.apps.AreasConfig',  # 省市区模块
+    'contents.apps.ContentsConfig',  # 首页模块
+    'goods.apps.GoodsConfig',  # 商品模块
 ]
 
 MIDDLEWARE = [
