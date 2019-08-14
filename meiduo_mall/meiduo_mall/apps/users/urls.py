@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^emails/$', views.EmailView.as_view()),
     url(r'^emails/verification/$', views.VerifyEmailView.as_view()),
     url(r'^addresses/$', views.AdressesView.as_view()),
+    url(r'^addresses/create/$', views.CreateAddressView.as_view()),
 ]

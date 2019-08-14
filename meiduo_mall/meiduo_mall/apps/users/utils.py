@@ -23,7 +23,6 @@ def get_user_by_account(account):
 
 
 class UsernameMobileAuthBackend(ModelBackend):
-
     """自定义登录认证后端类"""
 
     def authenticate(self, request, username=None, password=None, **kwargs):
@@ -39,7 +38,7 @@ def generate_email_verify_url(user):
     """拿到用户信息进行加密并拼接激活url"""
     serializer = Serializer(settings.SECRET_KEY, 3600 * 24)
 
-    data  = {'user_id': user.id, 'email': user.email}
+    data = {'user_id': user.id, 'email': user.email}
 
     token = serializer.dumps(data).decode()
 

@@ -183,6 +183,12 @@ class EmailView(LoginRequiredView):
         if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
             # return http.JsonResponse({'code': RETCODE.EMAILERR, 'errmsg': '邮箱格式错误'})
             return http.HttpResponseForbidden('邮箱格式不正确')
+
+        # 后期如果需要判断用户的邮箱输入的邮箱是否重复，可以用此判断
+        # count = User.objects.filter(email=email).count()
+        # if count != 0:
+        #     return http.HttpResponseForbidden('邮箱重复')
+
         # 业务逻辑实现
         # 获取当前登录用户user
         user = request.user
@@ -197,6 +203,7 @@ class EmailView(LoginRequiredView):
         #           recipient_list=[email], # 收件人
         #           html_message="<a href='http://www.itcast.cn''>传智<a>")  # 超文本内容
         # verify_url = 'http://www.meiduo.site:8000/verify_email?token='
+
         verify_url = generate_email_verify_url(request.user)
         send_verify_email.delay(email, verify_url)
         # 响应
@@ -229,3 +236,28 @@ class AdressesView(LoginRequiredView):
     def get(self, request):
         """展示用户收货地址"""
         return render(request, 'user_center_site.html')
+
+class CreateAddressView(LoginRequiredView):
+    """新增收货地址"""
+
+    def post(self, request):
+
+        # 接收请求体的非表单body
+        json_dict = json.loads(request.body.decode())
+        title = json_dict.get('title'),
+        receiver = json_dict.get('receiver')
+        province_id = json_dict.get('province_id')
+        city_id = json_dict.get('city_id')
+        district_id = json_dict.get('district_id')
+        place = json_dict.get('place')
+        mobile = json_dict.get('mobile')
+        tel = json_dict.get('tel')
+        email = json_dict.get('email')
+        # 校验
+        if all([title, receiver, province_id, city_id, district_id, place, mobile]) is False:
+            return http.HttpResponseForbidden('缺少必传参数')
+        # 给Address模型对象并save
+
+        # 响应
+
+        pass
