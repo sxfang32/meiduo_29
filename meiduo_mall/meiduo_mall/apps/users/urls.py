@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^addresses/$', views.AdressesView.as_view()),
     url(r'^addresses/create/$', views.CreateAddressView.as_view()),
     url(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDestroyAddressView.as_view()),
+    url(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view()),
 ]

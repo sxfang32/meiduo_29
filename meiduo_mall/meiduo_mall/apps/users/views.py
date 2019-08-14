@@ -266,8 +266,8 @@ class AdressesView(LoginRequiredView):
             )
 
         context = {
-            'addresses' :addresses,
-            'default_address_id':user.default_address_id  # 获取道歉用户的默认收货地址ID
+            'addresses': addresses,
+            'default_address_id': user.default_address_id  # 获取道歉用户的默认收货地址ID
         }
         return render(request, 'user_center_site.html', context)
 
@@ -353,7 +353,9 @@ class CreateAddressView(LoginRequiredView):
 
 class UpdateDestroyAddressView(LoginRequiredView):
     """修改和删除地址"""
+
     def put(self, request, address_id):
+        """修改地址"""
 
         # 校验要修改的收货地址是否存在
         try:
@@ -387,35 +389,35 @@ class UpdateDestroyAddressView(LoginRequiredView):
 
         # 给Address模型对象并save
         try:
-            Address.objects.filter(id=address_id).update(
-                title=title,
-                receiver=receiver,
-                province_id=province_id,
-                city_id=city_id,
-                district_id=district_id,
-                place=place,
-                mobile=mobile,
-                tel=tel,
-                email=email
-            )
+            # Address.objects.filter(id=address_id).update(
+            #     title=title,
+            #     receiver=receiver,
+            #     province_id=province_id,
+            #     city_id=city_id,
+            #     district_id=district_id,
+            #     place=place,
+            #     mobile=mobile,
+            #     tel=tel,
+            #     email=email
+            # )
             # 更加合理的写法
-            # address = Address.objects.get(id=address_id)
-            # title = address.title
-            # receiver= address.receiver
-            # province_id= address.province_id
-            # city_id= address.city_id
-            # district_id= address.district_id
-            # place= address.place
-            # mobile= address.mobile
-            # tel= address.tel
-            # email= address.email
-            # address.save()
+            address = Address.objects.get(id=address_id)
+            address.title = title
+            address.receiver = receiver
+            address.province_id = province_id
+            address.city_id = city_id
+            address.district_id = district_id
+            address.place = place
+            address.mobile = mobile
+            address.tel = tel
+            address.email = email
+            address.save()
         except DatabaseError as e:
             logger.error(e)
             return http.HttpResponseForbidden('收货地址数据有误')
 
         # 重新从数据库查询新的收货地址
-        address = Address.objects.get(id=address_id)
+        # address = Address.objects.get(id=address_id)
 
         address_dict = {
             "id": address.id,
@@ -436,3 +438,23 @@ class UpdateDestroyAddressView(LoginRequiredView):
         # 响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '修改收货地址成功', 'address': address_dict})
 
+    def delete(self, request, address_id):
+        """删除指定收货地址"""
+        # 校验
+        try:
+            address = Address.objects.get(id=address_id, user=request.user, is_deleted=False)
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '删除地址失败'})
+        # 修改
+        address.is_deleted = True
+        address.save()
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
+
+
+class DefaultAddressView(LoginRequiredView):
+    """设置默认地址"""
+
+    def put(self, request):
+        """设置默认地址"""
