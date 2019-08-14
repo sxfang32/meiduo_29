@@ -11,10 +11,13 @@ import re
 from django_redis import get_redis_connection
 
 from meiduo_mall.utils.response_code import RETCODE
-from .models import *
+from .models import User, Address
 from meiduo_mall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
 from .utils import generate_email_verify_url, check_email_verify_url
+import logging
+
+logger = logging.getLogger('django')
 
 
 class RegisterView(View):
@@ -237,10 +240,16 @@ class AdressesView(LoginRequiredView):
         """展示用户收货地址"""
         return render(request, 'user_center_site.html')
 
+
 class CreateAddressView(LoginRequiredView):
     """新增收货地址"""
 
     def post(self, request):
+
+        # 查询当前用户收货地址数量
+        count = Address.objects.filter(user=request.user, is_deleted=False).count()
+        if count >= 20:
+            return http.JsonResponse({'code': RETCODE.THROTTLINGERR, 'errmsg': '收货地址超过上限'})
 
         # 接收请求体的非表单body
         json_dict = json.loads(request.body.decode())
@@ -253,11 +262,40 @@ class CreateAddressView(LoginRequiredView):
         mobile = json_dict.get('mobile')
         tel = json_dict.get('tel')
         email = json_dict.get('email')
+
         # 校验
         if all([title, receiver, province_id, city_id, district_id, place, mobile]) is False:
             return http.HttpResponseForbidden('缺少必传参数')
+        if not re.match(r'^1[3-9]\d{9}$', mobile):
+            return http.HttpResponseForbidden('参数mobile有误')
+        if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
+            return http.HttpResponseForbidden('参数tel有误')
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.HttpResponseForbidden('参数email有误')
+
         # 给Address模型对象并save
+        try:
+            address = Address.objects.create(
+                user=request.user,
+                title=title,
+                receiver=receiver,
+                province_id=province_id,
+                city=city_id,
+                district_id=district_id,
+                place=place,
+                mobile=mobile,
+                tel=tel,
+                email=email
+            )
+        except DatabaseError as e:
+            logger.error(e)
+            return http.HttpResponseForbidden('收货地址数据有误')
+
+        # 设置一个默认地址，判断如果没有默认地址，新增的这个就是默认地址
+        if request.user.default_address is None:
+            request.user.default_address = address
+            address.save()
 
         # 响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '新增收货地址成功'})
 
-        pass
