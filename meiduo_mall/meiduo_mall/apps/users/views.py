@@ -268,10 +268,12 @@ class CreateAddressView(LoginRequiredView):
             return http.HttpResponseForbidden('缺少必传参数')
         if not re.match(r'^1[3-9]\d{9}$', mobile):
             return http.HttpResponseForbidden('参数mobile有误')
-        if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
-            return http.HttpResponseForbidden('参数tel有误')
-        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
-            return http.HttpResponseForbidden('参数email有误')
+        if tel:
+            if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
+                return http.HttpResponseForbidden('参数tel有误')
+        if email:
+            if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+                return http.HttpResponseForbidden('参数email有误')
 
         # 给Address模型对象并save
         try:
@@ -280,7 +282,7 @@ class CreateAddressView(LoginRequiredView):
                 title=title,
                 receiver=receiver,
                 province_id=province_id,
-                city=city_id,
+                city_id=city_id,
                 district_id=district_id,
                 place=place,
                 mobile=mobile,
@@ -296,6 +298,23 @@ class CreateAddressView(LoginRequiredView):
             request.user.default_address = address
             address.save()
 
-        # 响应
-        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '新增收货地址成功'})
+        # 新增地址成功，将新增的地址响应给前端实现局部刷新
+        # 将新增的收货地址模型对象转换成字典响应给前端
+        address_dict = {
+            "id": address.id,
+            "title": address.title,
+            "receiver": address.receiver,
+            "province_id": address.province_id,
+            "province": address.province.name,
+            "city_id": address.city_id,
+            "city": address.city.name,
+            "district_id": address.district_id,
+            "district": address.district.name,
+            "place": address.place,
+            "mobile": address.mobile,
+            "tel": address.tel,
+            "email": address.email
+        }
 
+        # 响应
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '新增收货地址成功', 'address': address_dict})
