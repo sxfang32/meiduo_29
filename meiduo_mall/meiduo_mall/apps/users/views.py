@@ -267,7 +267,7 @@ class AdressesView(LoginRequiredView):
 
         context = {
             'addresses': addresses,
-            'default_address_id': user.default_address_id  # 获取道歉用户的默认收货地址ID
+            'default_address_id': user.default_address_id  # 获取当前用户的默认收货地址ID
         }
         return render(request, 'user_center_site.html', context)
 
