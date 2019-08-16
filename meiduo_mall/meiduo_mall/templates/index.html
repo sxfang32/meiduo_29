@@ -105,12 +105,16 @@
                     {% endfor %}
 				</div>
 				<div class="level2">
+                    {% for cat2 in group.sub_cats %}
 					<div class="list_group">
-						<div class="group_name fl">机票 &gt;</div>
+						<div class="group_name fl">{{cat2.name}} &gt;</div>
 						<div class="group_detail fl">
-							<a href="#">机票</a>
+                        {%for cat3 in cat2.sub_cats %}
+							<a href="{{cat3.url}}">{{cat3.name}}</a>
+                        {% endfor %}
 						</div>
 					</div>
+                    {% endfor %}
 				</div>
 			</li>
 		</ul>
