@@ -97,177 +97,18 @@
 		<ul class="points">
 		</ul>
 		<ul class="sub_menu">			
+			{% for group in categories.values() %}
 			<li>
 				<div class="level1">
-					<a href="http://shouji.jd.com/">手机</a><a href="#">运营商</a><a href="#">数码</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">手机通讯 &gt;</div>
-						<div class="group_detail fl">
-							<a href="/static/list.html">手机</a>
-							<a href="#">对讲机</a>
-							<a href="#">以旧换新</a>
-							<a href="#">手机维修</a>
-						</div>						
-					</div>
-					<div class="list_group">
-						<div class="group_name fl">运营商 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">合约机</a>
-							<a href="#">选号码</a>
-							<a href="#">固话宽带</a>
-							<a href="#">办套餐</a>
-							<a href="#">充话费/流量</a>
-							<a href="#">中国电信</a>
-							<a href="#">中国移动</a>
-							<a href="#">中国联通</a>
-							<a href="#">京东通信</a>
-							<a href="#">170选号</a>
-						</div>												
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">电脑</a><a href="#">办公</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">电脑 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">曲面电视</a>
-							<a href="#">超薄电视</a>
-							<a href="#">HDR电视</a>
-							<a href="#">OLED电视</a>
-							<a href="#">4K超清电视</a>
-							<a href="#">人工智能电视</a>
-							<a href="#">55英寸</a>
-							<a href="#">65英寸</a>							        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">家居</a><a href="#">家具</a><a href="#">家装</a><a href="#">厨具</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">家具 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">曲面电视</a>
-							<a href="#">超薄电视</a>
-							<a href="#">HDR电视</a>
-							<a href="#">OLED电视</a>
-							<a href="#">4K超清电视</a>
-							<a href="#">人工智能电视</a>
-							<a href="#">55英寸</a>
-							<a href="#">65英寸</a>							        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">男装</a><a href="#">女装</a><a href="#">童装</a><a href="#">内衣</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">男装 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">男装</a>					        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">女鞋</a><a href="#">箱包</a><a href="#">钟表</a><a href="#">珠宝</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">女鞋 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">女鞋</a>					        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">男鞋</a><a href="#">运动</a><a href="#">户外</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">男鞋 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">男鞋</a>					        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">房产</a><a href="#">汽车</a><a href="#">汽车用品</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">汽车用品 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">汽车用品</a>					        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">母婴</a><a href="#">玩具乐器</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">玩具乐器 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">玩具乐器</a>					        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">食品</a><a href="#">酒类</a><a href="#">生鲜</a><a href="#">特产</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">食品 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">食品</a>					        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">图书</a><a href="#">音像</a><a href="#">电子书</a>
-				</div>
-				<div class="level2">
-					<div class="list_group">
-						<div class="group_name fl">图书 &gt;</div>
-						<div class="group_detail fl">
-							<a href="#">图书</a>					        
-						</div>
-					</div>
-				</div>
-			</li>
-			<li>
-				<div class="level1">
-					<a href="#">机票</a><a href="#">酒店</a><a href="#">旅游</a><a href="#">生活</a>
+                    {% for cat1 in group.channels %}
+					<a href="{{ cat1.url }}">{{ cat1.name }}</a>
+                    {% endfor %}
 				</div>
 				<div class="level2">
 					<div class="list_group">
 						<div class="group_name fl">机票 &gt;</div>
 						<div class="group_detail fl">
-							<a href="#">机票</a>					        
+							<a href="#">机票</a>
 						</div>
 					</div>
 				</div>
