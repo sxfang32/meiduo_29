@@ -43,11 +43,12 @@ class IndexView(View):
                 # 查询指定二级下面的所有三级
                 cat3_qs = cat2.subs.all()
                 # 将当前二级下的所有三级保存到对应二级的一个自定义属性上
-                cat2.subs_cats = cat3_qs
+                cat2.sub_cats = cat3_qs
                 categories[group_id]['sub_cats'].append(cat2)
 
         context = {
             'categories': categories,
             'contents': '广告数据'
         }
+
         return render(request, 'index.html', context)
