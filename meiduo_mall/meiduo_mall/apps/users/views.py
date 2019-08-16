@@ -306,7 +306,7 @@ class CreateAddressView(LoginRequiredView):
             if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
                 return http.HttpResponseForbidden('参数email有误')
 
-        # 给Address模型对象并save
+        # 创建Address模型对象 并save
         try:
             address = Address.objects.create(
                 user=request.user,
@@ -449,6 +449,8 @@ class UpdateDestroyAddressView(LoginRequiredView):
         # 修改
         address.is_deleted = True
         address.save()
+
+        # TODO 需要加一个判断，如果删除的是默认地址，需要重新将用户的默认地址置为None
 
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
 
