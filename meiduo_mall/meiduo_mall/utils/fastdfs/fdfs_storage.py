@@ -1,6 +1,7 @@
 from django.core.files.storage import Storage
 from django.conf import settings
 
+
 class FastDFSStorage(Storage):
 
     def _open(self, name, mode='rb'):
@@ -26,4 +27,3 @@ class FastDFSStorage(Storage):
         :return:绝对路径 http://192.168.27.128:8888/ + name
         """
         return settings.FDFS_BASE_URL + name
-
