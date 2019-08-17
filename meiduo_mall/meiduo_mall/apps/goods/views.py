@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.views import View
 from contents.utls import get_categories
-from .models import GoodsCategory, SKU
+from .models import GoodsCategory, SKU, GoodsVisitCount
 from django import http
 from django.core.paginator import Paginator, EmptyPage
 from goods.utils import get_breadcrumb
 from meiduo_mall.utils.response_code import RETCODE
+from django.utils import timezone
 
 
 class ListView(View):
@@ -87,7 +88,7 @@ class HotGoodView(View):
                     'id': sku_model.id,
                     'name': sku_model.name,
                     'price': sku_model.price,
-                    'defult_image_url': sku_model.default_image.url
+                    'default_image_url': sku_model.default_image.url
                 }
             )
 
@@ -154,3 +155,27 @@ class DetailView(View):
         }
 
         return render(request, 'detail.html', context)
+
+
+class DeatilVisitView(View):
+
+    def post(self, request, category_id):
+
+        # 校验
+        try:
+            category = GoodsCategory.objects.get(id=category_id)
+        except GoodsCategory.DoesNotExist:
+            return http.HttpResponseForbidden('category_id不存在')
+
+        now_date = timezone.now()  # 获取当前日期
+        try:
+            visit_count_model = GoodsVisitCount.objects.get(category_id=category_id, date=now_date)
+        except GoodsVisitCount.DoesNotExist:
+            # 如果当前这个三级类别今日没有访问过，创建一个新的记录
+            visit_count_model = GoodsVisitCount(category_id=category_id)
+
+        # 无论今天是否访问过，直接对count +=1 再保存
+        visit_count_model.count += 1
+        visit_count_model.save()
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
