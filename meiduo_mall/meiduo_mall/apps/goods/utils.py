@@ -1,6 +1,3 @@
-
-
-
 def get_breadcrumb(cat3):
     """包装指定类别的面包屑"""
     cat1 = cat3.parent.parent
@@ -13,3 +10,4 @@ def get_breadcrumb(cat3):
         'cat2': cat3.parent,
         'cat3': cat3
     }
+    return breadcrumb
