@@ -4,6 +4,7 @@ from contents.utls import get_categories
 from .models import GoodsCategory
 from django import http
 from django.core.paginator import Paginator,EmptyPage
+from goods.utils import get_breadcrumb
 
 
 class ListView(View):
@@ -16,16 +17,16 @@ class ListView(View):
         except GoodsCategory.DoesNotExist:
             return http.HttpResponseForbidden('类别ID不存在')
 
-        cat1 = cat3.parent.parent
-        # 给一级类别定义URL属性
-        cat1.url = cat1.goodschannel_set.all()[0].url
-
-        # 包装面包屑导航数据
-        breadcrumb = {
-            'cat1': cat3.parent.parent,
-            'cat2': cat3.parent,
-            'cat3': cat3
-        }
+        # cat1 = cat3.parent.parent
+        # # 给一级类别定义URL属性
+        # cat1.url = cat1.goodschannel_set.all()[0].url
+        #
+        # # 包装面包屑导航数据
+        # breadcrumb = {
+        #     'cat1': cat3.parent.parent,
+        #     'cat2': cat3.parent,
+        #     'cat3': cat3
+        # }
 
         # 获取查询参数中的排序规则
         sort = request.GET.get('sort')
@@ -53,7 +54,7 @@ class ListView(View):
 
         context = {
             'categories': get_categories(),  # 频道分类
-            'breadcrumb': breadcrumb,  # 面包屑导航
+            'breadcrumb': get_categories(cat3),  # 面包屑导航
             'sort': sort,  # 排序字段
             'category': cat3,  # 第三级分类
             'page_skus': page_skus,  # 分页后的数据
