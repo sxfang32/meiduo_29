@@ -228,9 +228,11 @@ EMAIL_FROM = '美多商城<itcast99@163.com>'  # 发件人抬头
 
 EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
 
-# 远程图片文件的绝对路径前半段（路由）
+# 指定远程图片文件的绝对路径前半段（路由）
 # MEDIA_URL = 'http://192.168.27.128:8888/'
 
+# 修改Django的文件存储类
 DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
 
+# 指定远程图片文件的绝对路径前半段（路由）
 FDFS_BASE_URL = 'http://image.meiduo.site:8888/'
