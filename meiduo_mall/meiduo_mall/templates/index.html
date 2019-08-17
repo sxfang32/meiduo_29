@@ -1,420 +1,299 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<title>美多商城-首页</title>
-	<link rel="stylesheet" type="text/css" href="/static/css/reset.css">
-	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>美多商城-首页</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <script type="text/javascript" src="/static/js/host.js"></script>
-	<script type="text/javascript" src="/static/js/vue-2.5.16.js"></script>
+    <script type="text/javascript" src="/static/js/vue-2.5.16.js"></script>
     <script type="text/javascript" src="/static/js/axios-0.18.0.min.js"></script>
-	<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
 </head>
 <body>
-	<div id="app" v-cloak>
-	<div class="header_con">
-		<div class="header">
-			<div class="welcome fl">欢迎来到美多商城!</div>
-			<div class="fr">
-				<div class="login_btn fl" v-if="username">
-					欢迎您：<em>[[ username ]]</em>
-					<span>|</span>
-					<a href="/logout/" class="quit">退出</a>
-				</div>
-				<div class="login_btn fl" v-else>
-					<a href="/login/">登录</a>
-					<span>|</span>
-					<a href="/register/">注册</a>
-				</div>
+<div id="app" v-cloak>
+    <div class="header_con">
+        <div class="header">
+            <div class="welcome fl">欢迎来到美多商城!</div>
+            <div class="fr">
+                <div class="login_btn fl" v-if="username">
+                    欢迎您：<em>[[ username ]]</em>
+                    <span>|</span>
+                    <a href="/logout/" class="quit">退出</a>
+                </div>
+                <div class="login_btn fl" v-else>
+                    <a href="/login/">登录</a>
+                    <span>|</span>
+                    <a href="/register/">注册</a>
+                </div>
 
-				<div class="user_link fl">
-					<span>|</span>
-					<a href="/info/">用户中心</a>
-					<span>|</span>
-					<a href="/static/cart.html">我的购物车</a>
-					<span>|</span>
-					<a href="/static/user_center_order.html">我的订单</a>
-				</div>
-			</div>
-		</div>		
-	</div>
+                <div class="user_link fl">
+                    <span>|</span>
+                    <a href="/info/">用户中心</a>
+                    <span>|</span>
+                    <a href="/carts/">我的购物车</a>
+                    <span>|</span>
+                    <a href="/orders/info/1/">我的订单</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<div class="search_bar clearfix">
-		<a href="index.html" class="logo fl"><img src="/static/images/logo.png"></a>
-		<div class="search_wrap fl">
-			<form method="get" action="/search/" class="search_con">
+    <div class="search_bar clearfix">
+        <a href="/" class="logo fl"><img src="/static/images/logo.png"></a>
+        <div class="search_wrap fl">
+            <form method="get" action="/search/" class="search_con">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <input type="text" class="input_text fl" name="q" placeholder="搜索商品">
                 <input type="submit" class="input_btn fr" name="" value="搜索">
             </form>
-			<ul class="search_suggest fl">
-				<li><a href="#">索尼微单</a></li>
-				<li><a href="#">优惠15元</a></li>
-				<li><a href="#">美妆个护</a></li>
-				<li><a href="#">买2免1</a></li>
-			</ul>
-		</div>	
-		
-		<div class="guest_cart fr">
-			<a href="/static/cart.html" class="cart_name fl">我的购物车</a>
-			<div class="goods_count fl" id="show_count">2</div>
-			<ul class="cart_goods_show">
-				<li>
-					<img src="/static/images/goods/goods001.jpg" alt="商品图片">
-					<h4>华为 HUAWEI P10 Plus 6GB+64GB 钻雕金 移动联通电信4G手机 双卡双待</h4>
-					<div>1</div>
-				</li>
-				<li>
-					<img src="/static/images/goods/goods002.jpg" alt="商品图片">
-					<h4>Apple iPhoneX 64GB 深空灰色 移动联通电信4G手机</h4>
-					<div>1</div>
-				</li>
-			</ul>			
-		</div>
-	</div>
+            <ul class="search_suggest fl">
+                <li><a href="#">索尼微单</a></li>
+                <li><a href="#">优惠15元</a></li>
+                <li><a href="#">美妆个护</a></li>
+                <li><a href="#">买2免1</a></li>
+            </ul>
+        </div>
 
-	<div class="navbar_con">
-		<div class="navbar">
-			<h1 class="fl">商品分类</h1>
-			<ul class="navlist fl">
-				<li><a href="">首页</a></li>
-				<li class="interval">|</li>
-				<li><a href="">真划算</a></li>
-				<li class="interval">|</li>
-				<li><a href="">抽奖</a></li>
-			</ul>
-		</div>
-	</div>
+        <div @mouseenter="get_carts" class="guest_cart fr" v-cloak>
+            <a href="/carts/" class="cart_name fl">我的购物车</a>
+            <div class="goods_count fl" id="show_count">[[ cart_total_count ]]</div>
+            <ul class="cart_goods_show">
+                <li v-for="sku in carts">
+                    <img :src="sku.default_image_url" alt="商品图片">
+                    <h4>[[ sku.name ]]</h4>
+                    <div>[[ sku.count ]]</div>
+                </li>
+            </ul>
+        </div>
+    </div>
 
-	<div class="pos_center_con clearfix">
-		<ul class="slide">
-			<li><a href="#"><img src="/static/images/slide01.jpg" alt="幻灯片01"></a></li>
-			<li><a href="#"><img src="/static/images/slide02.jpg" alt="幻灯片02"></a></li>
-			<li><a href="#"><img src="/static/images/slide03.jpg" alt="幻灯片03"></a></li>
-			<li><a href="#"><img src="/static/images/slide04.jpg" alt="幻灯片04"></a></li>
-		</ul>
-		<div class="prev"></div>
-		<div class="next"></div>
-		<ul class="points">
-		</ul>
-		<ul class="sub_menu">			
-			{% for group in categories.values() %}
-			<li>
-				<div class="level1">
-                    {% for cat1 in group.channels %}
-					<a href="{{ cat1.url }}">{{ cat1.name }}</a>
-                    {% endfor %}
-				</div>
-				<div class="level2">
-                    {% for cat2 in group.sub_cats %}
-					<div class="list_group">
-						<div class="group_name fl">{{cat2.name}} &gt;</div>
-						<div class="group_detail fl">
-                        {%for cat3 in cat2.sub_cats %}
-							<a href="{{cat3.url}}">{{cat3.name}}</a>
+    <div class="navbar_con">
+        <div class="navbar">
+            <h1 class="fl">商品分类</h1>
+            <ul class="navlist fl">
+                <li><a href="">首页</a></li>
+                <li class="interval">|</li>
+                <li><a href="">真划算</a></li>
+                <li class="interval">|</li>
+                <li><a href="">抽奖</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="pos_center_con clearfix">
+        <ul class="slide">
+            {% for content in contents.index_lbt %}
+                <li><a href="{{ content.url }}"><img src="{{ content.image.url }}" alt="{{ content.title }}"></a></li>
+            {% endfor %}
+        </ul>
+        <div class="prev"></div>
+        <div class="next"></div>
+        <ul class="points">
+        </ul>
+        <ul class="sub_menu">
+            {% for group in categories.values() %}
+                <li>
+                    <div class="level1">
+                        {% for channel in group.channels %}
+                            <a href="{{ channel.url }}">{{ channel.name }}</a>
                         {% endfor %}
-						</div>
-					</div>
+                    </div>
+                    <div class="level2">
+                        {% for cat2 in group.sub_cats %}
+                            <div class="list_group">
+                                <div class="group_name fl">{{ cat2.name }} &gt;</div>
+                                <div class="group_detail fl">
+                                    {% for cat3 in cat2.sub_cats %}
+                                        <a href="{{ cat3.url }}">{{ cat3.name }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="news">
+            <div class="news_title">
+                <h3>快讯</h3>
+                <a href="#">更多 &gt;</a>
+            </div>
+            <ul class="news_list">
+                {% for content in contents.index_kx %}
+                    <li><a href="{{ content.url }}">{{ content.title }}</a></li>
+                {% endfor %}
+            </ul>
+            {% for content in contents.index_ytgg %}
+                <a href="{{ content.url }}" class="advs"><img src="{{ content.image.url }}"></a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="list_model">
+        <div class="list_title clearfix">
+            <h3 class="fl" id="model01">1F 手机通讯</h3>
+            <div class="subtitle fr">
+                <a @mouseenter="f1_tab=1" :class="f1_tab===1?'active':''">时尚新品</a>
+                <a @mouseenter="f1_tab=2" :class="f1_tab===2?'active':''">畅想低价</a>
+                <a @mouseenter="f1_tab=3" :class="f1_tab===3?'active':''">手机配件</a>
+            </div>
+        </div>
+        <div class="goods_con clearfix">
+            <div class="goods_banner fl">
+                <img src="{{ contents.index_1f_logo.0.image.url }}">
+                <div class="channel">
+                    {% for content in contents.index_1f_pd %}
+                        <a href="{{ content.url }}">{{ content.title }}</a>
                     {% endfor %}
-				</div>
-			</li>
-        {% endfor %}
-		</ul>
+                </div>
+                <div class="key_words">
+                    {% for content in contents.index_1f_bq %}
+                        <a href="{{ content.url }}">{{ content.title }}</a>
+                    {% endfor %}
+                </div>
 
-		<div class="news">
-			<div class="news_title">
-				<h3>快讯</h3>
-				<a href="#">更多 &gt;</a>
-			</div>
-			<ul class="news_list">
-				<li><a href="#">i7顽石低至4199元</a></li>
-				<li><a href="#">奥克斯专场 正1匹空调1313元抢</a></li>
-				<li><a href="#">荣耀9青春版 高配 领券立减220元</a></li>
-				<li><a href="#">美多探索公益新模式</a></li>
-				<li><a href="#">i7顽石低至4199元</a></li>
-				<li><a href="#">正1匹空调1313元抢</a></li>
-				<li><a href="#">奥克斯专场 正1匹空调1313元抢</a></li>
-			</ul>
-			<a href="#" class="advs"><img src="/static/images/adv01.jpg"></a>
-		</div>
-	</div>
+            </div>
+            <div class="goods_list_con">
+                <ul v-show="f1_tab===1" class="goods_list fl">
+                    {% for content in contents.index_1f_ssxp %}
+                        <li>
+                            <a href="{{ content.url }}" class="goods_pic"><img src="{{ content.image.url }}"></a>
+                            <h4><a href="{{ content.url }}" title="{{ content.title }}">{{ content.title }}</a></h4>
+                            <div class="price">{{ content.text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <ul v-show="f1_tab===2" class="goods_list fl">
+                    {% for content in contents.index_1f_cxdj %}
+                        <li>
+                            <a href="{{ content.url }}" class="goods_pic"><img src="{{ content.image.url }}"></a>
+                            <h4><a href="{{ content.url }}" title="{{ content.title }}">{{ content.title }}</a></h4>
+                            <div class="price">{{ content.text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <ul v-show="f1_tab===3" class="goods_list fl">
+                    {% for content in contents.index_1f_sjpj %}
+                        <li>
+                            <a href="{{ content.url }}" class="goods_pic"><img src="{{ content.image.url }}"></a>
+                            <h4><a href="{{ content.url }}" title="{{ content.title }}">{{ content.title }}</a></h4>
+                            <div class="price">{{ content.text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 
-	<div class="list_model">
-		<div class="list_title clearfix">
-			<h3 class="fl" id="model01">1F 手机通讯</h3>
-			<div class="subtitle fr">
-				<a href="javascript:;" class="active">时尚新品</a>
-				<a href="javascript:;">畅想低价</a>
-				<a href="javascript:;">手机配件</a>
-			</div>
-		</div>
-		<div class="goods_con clearfix">
-			<div class="goods_banner fl">
-				<img src="/static/images/banner01.jpg">
-				<div class="channel">
-					<a href="#">手机</a>
-					<a href="#">配件</a>
-					<a href="#">充值</a>
-					<a href="#">优惠券</a>
-				</div>
-				<div class="key_words">
-					<a href="#">荣耀手机</a>
-					<a href="#">国美手机</a>
-					<a href="#">华为手机</a>
-					<a href="#">热销推荐</a>
-					<a href="#">以旧换新</a>
-					<a href="#">潮3C</a>
-					<a href="#">全面屏</a>
-					<a href="#">守护宝</a>
-					<a href="#">存储卡</a>
-					<a href="#">保护套</a>
-				</div>
-			</div>
-			<div class="goods_list_con">
-				<ul class="goods_list fl goods_list_show">
-					<li>					
-						<a href="http://itcast.cn/" class="goods_pic"><img src="/static/images/goods/goods003.jpg"></a>
-						<h4><a href="#" title="360手机 N6 Pro 全网通 6GB+128GB 极夜黑">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 2699.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods002.jpg"></a>
-						<h4><a href="#">iphoneX N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 7788.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods001.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 1988.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods004.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 3688.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods005.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 4288.80</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods003.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 2699.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods002.jpg"></a>
-						<h4><a href="#">iphoneX N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 7788.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods001.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 1988.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods004.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 3688.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods005.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 4288.80</div>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
+    <div class="list_model model02">
+        <div class="list_title clearfix">
+            <h3 class="fl" id="model01">2F 电脑数码</h3>
+            <div class="subtitle fr">
+                <a @mouseenter="f2_tab=1" :class="f2_tab===1?'active':''">加价换购</a>
+                <a @mouseenter="f2_tab=2" :class="f2_tab===2?'active':''">畅享低价</a>
+            </div>
+        </div>
+        <div class="goods_con clearfix">
+            <div class="goods_banner fl">
+                <img src="{{ contents.index_2f_logo.0.image.url }}">
+                <div class="channel">
+                    {% for content in contents.index_2f_pd %}
+                        <a href="{{ content.url }}">{{ content.title }}</a>
+                    {% endfor %}
+                </div>
+                <div class="key_words">
+                    {% for content in contents.index_2f_bq %}
+                        <a href="{{ content.url }}">{{ content.title }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="goods_list_con">
+                <ul v-show="f2_tab===1" class="goods_list fl">
+                    {% for content in contents.index_2f_cxdj %}
+                        <li>
+                            <a href="{{ content.url }}" class="goods_pic"><img src="{{ content.image.url }}"></a>
+                            <h4><a href="{{ content.url }}" title="{{ content.title }}">{{ content.title }}</a></h4>
+                            <div class="price">{{ content.text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <ul v-show="f2_tab===2" class="goods_list fl">
+                    {% for content in contents.index_2f_jjhg %}
+                        <li>
+                            <a href="{{ content.url }}" class="goods_pic"><img src="{{ content.image.url }}"></a>
+                            <h4><a href="{{ content.url }}" title="{{ content.title }}">{{ content.title }}</a></h4>
+                            <div class="price">{{ content.text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 
-	<div class="list_model model02">
-		<div class="list_title clearfix">
-			<h3 class="fl" id="model01">2F 电脑数码</h3>
-			<div class="subtitle fr">
-			<a href="javascript:;" class="active">畅享低价</a>
-            <a href="javascript:;">加价换购</a>
-			</div>
-		</div>
-		<div class="goods_con clearfix">
-			<div class="goods_banner fl">
-				<img src="/static/images/banner02.jpg">
-				<div class="channel">
-					<a href="#">电脑</a>
-					<a href="#">数码</a>
-					<a href="#">配件</a>
-					<a href="#">潮电子</a>
-				</div>
-				<div class="key_words">
-					<a href="#">Apple</a>
-					<a href="#">神舟战神</a>
-					<a href="#">单反相机</a>
-					<a href="#">智能家居</a>
-					<a href="#">智能路由</a>
-					<a href="#">限时抢</a>
-					<a href="#">顽石</a>
-					<a href="#">微单</a>
-					<a href="#">耳机</a>
-					<a href="#">投影机</a>
-				</div>
-			</div>
-			<div class="goods_list_con">
-				<ul class="goods_list fl goods_list_show">
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods008.jpg"></a>
-						<h4><a href="#" title="华硕明星爆款 八代i7顽石低至4199">华硕明星爆款 八代i7顽石低至4199</a></h4>
-						<div class="price">¥ 4199.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods002.jpg"></a>
-						<h4><a href="#">iphoneX N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 7788.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods001.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 1988.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods004.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 3688.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods005.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 4288.80</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods003.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 2699.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods002.jpg"></a>
-						<h4><a href="#">iphoneX N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 7788.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods001.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 1988.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods004.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 3688.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods005.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 4288.80</div>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	
-	<div class="list_model model03">
-		<div class="list_title clearfix">
-			<h3 class="fl" id="model01">3F 家居家装</h3>
-			<div class="subtitle fr">
-				<a href="javascript:;" class="active">生活用品</a>
-                <a href="javascript:;">厨房用品</a>
-			</div>
-		</div>
-		<div class="goods_con clearfix">
-			<div class="goods_banner fl">
-				<img src="/static/images/banner03.jpg">
-				<div class="channel">
-					<a href="#">家居日用</a>
-					<a href="#">家纺寝居</a>
-					<a href="#">住宅家具</a>
-				</div>
-				<div class="key_words">
-					<a href="#">厨具餐饮</a>
-					<a href="#">被子</a>
-					<a href="#">实木床</a>
-					<a href="#">箭牌马桶</a>
-					<a href="#">指纹锁</a>
-					<a href="#">电饭煲</a>
-					<a href="#">热水器</a>
-					<a href="#">席梦思</a>
-					<a href="#">沙发</a>
-					<a href="#">酒柜</a>
-				</div>
-			</div>
-			<div class="goods_list_con">
-				<ul class="goods_list fl goods_list_show">
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods009.jpg"></a>
-						<h4><a href="#" title="维达3层超韧120抽软抽纸每提4包【大规格L】V2240(4包)">维达3层超韧120抽软抽纸每提4包【大规格L】V2240(4包)</a></h4>
-						<div class="price">¥ 18.80</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods002.jpg"></a>
-						<h4><a href="#">iphoneX N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 7788.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods001.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 1988.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods004.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 3688.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods005.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 4288.80</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods003.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 2699.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods002.jpg"></a>
-						<h4><a href="#">iphoneX N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 7788.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods001.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 1988.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods004.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 3688.00</div>
-					</li>
-					<li>					
-						<a href="#" class="goods_pic"><img src="/static/images/goods/goods005.jpg"></a>
-						<h4><a href="#">360手机 N6 Pro 全网通 6GB+128GB 极夜黑</a></h4>
-						<div class="price">¥ 4288.80</div>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
+    <div class="list_model model03">
+        <div class="list_title clearfix">
+            <h3 class="fl" id="model01">3F 家居家装</h3>
+            <div class="subtitle fr">
+                <a @mouseenter="f3_tab=1" :class="f3_tab===1?'active':''">生活用品</a>
+                <a @mouseenter="f3_tab=2" :class="f3_tab===2?'active':''">厨房用品</a>
+            </div>
+        </div>
+        <div class="goods_con clearfix">
+            <div class="goods_banner fl">
+                <img src="{{ contents.index_3f_logo.0.image.url }}">
+                <div class="channel">
+                    {% for content in contents.index_3f_pd %}
+                        <a href="{{ content.url }}">{{ content.title }}</a>
+                    {% endfor %}
+                </div>
+                <div class="key_words">
+                    {% for content in contents.index_3f_bq %}
+                        <a href="{{ content.url }}">{{ content.title }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="goods_list_con">
+                <ul v-show="f3_tab===1" class="goods_list fl">
+                    {% for content in contents.index_3f_shyp %}
+                        <li>
+                            <a href="{{ content.url }}" class="goods_pic"><img src="{{ content.image.url }}"></a>
+                            <h4><a href="{{ content.url }}" title="{{ content.title }}">{{ content.title }}</a></h4>
+                            <div class="price">{{ content.text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <ul v-show="f3_tab===2" class="goods_list fl">
+                    {% for content in contents.index_3f_cfyp %}
+                        <li>
+                            <a href="{{ content.url }}" class="goods_pic"><img src="{{ content.image.url }}"></a>
+                            <h4><a href="{{ content.url }}" title="{{ content.title }}">{{ content.title }}</a></h4>
+                            <div class="price">{{ content.text }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 
-	<div class="footer">
-		<div class="foot_link">
-			<a href="#">关于我们</a>
-			<span>|</span>
-			<a href="#">联系我们</a>
-			<span>|</span>
-			<a href="#">招聘人才</a>
-			<span>|</span>
-			<a href="#">友情链接</a>		
-		</div>
-		<p>CopyRight © 2016 北京美多商业股份有限公司 All Rights Reserved</p>
-		<p>电话：010-****888    京ICP备*******8号</p>
-	</div>
-	</div>
-	<script type="text/javascript" src="/static/js/slide.js"></script>
-	<script type="text/javascript" src="/static/js/common.js"></script>
-	<script type="text/javascript" src="/static/js/index.js"></script>
+    <div class="footer">
+        <div class="foot_link">
+            <a href="#">关于我们</a>
+            <span>|</span>
+            <a href="#">联系我们</a>
+            <span>|</span>
+            <a href="#">招聘人才</a>
+            <span>|</span>
+            <a href="#">友情链接</a>
+        </div>
+        <p>CopyRight © 2016 北京美多商业股份有限公司 All Rights Reserved</p>
+        <p>电话：010-****888 京ICP备*******8号</p>
+    </div>
+</div>
+<script type="text/javascript" src="/static/js/slide.js"></script>
+<script type="text/javascript" src="/static/js/common.js"></script>
+<script type="text/javascript" src="/static/js/index.js"></script>
 </body>
 </html>
