@@ -15,6 +15,7 @@ from .models import User, Address
 from meiduo_mall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
 from .utils import generate_email_verify_url, check_email_verify_url
+from goods.models import SKU
 import logging
 
 logger = logging.getLogger('django')
@@ -463,7 +464,7 @@ class DefaultAddressView(LoginRequiredView):
 
         # 校验要设置的地址是否存在
         try:
-            address = Address.objects.get(id=address_id,user=request.user, is_deleted=False)
+            address = Address.objects.get(id=address_id, user=request.user, is_deleted=False)
         except Exception as e:
             logger.error(e)
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '设置默认地址失败'})
@@ -474,12 +475,14 @@ class DefaultAddressView(LoginRequiredView):
 
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '设置默认地址成功'})
 
+
 class UpdateTitleAddressView(LoginRequiredView):
     """修改标题"""
+
     def put(self, request, address_id):
         """修改标题"""
         try:
-            address = Address.objects.get(id=address_id,user=request.user, is_deleted=False)
+            address = Address.objects.get(id=address_id, user=request.user, is_deleted=False)
         except Exception as e:
             logger.error(e)
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '修改地址标题失败'})
@@ -499,7 +502,7 @@ class ChangePasswordView(LoginRequiredView):
 
     def get(self, request):
         """展示修改密码页面"""
-        return render(request,'user_center_pass.html')
+        return render(request, 'user_center_pass.html')
 
     def post(self, request):
         """修改密码逻辑"""
@@ -516,7 +519,7 @@ class ChangePasswordView(LoginRequiredView):
 
         user = request.user
         if user.check_password(old_pwd) is False:
-            return render(request,'user_center_pass.html',{'origin_pwd_errmsg':'原始密码错误'})
+            return render(request, 'user_center_pass.html', {'origin_pwd_errmsg': '原始密码错误'})
         if not re.match(r'^[0-9A-Za-z]{8,20}$', new_pwd):
             return http.HttpResponseForbidden('密码最少8位，最长20位')
         if new_pwd != new_cpwd:
@@ -531,3 +534,56 @@ class ChangePasswordView(LoginRequiredView):
         response = redirect('/login/')
         response.delete_cookie('username')
         return response
+
+
+class UserBrowseHistory(LoginRequiredView, View):
+    """商品浏览记录"""
+
+    def post(self, request):
+        """保存浏览记录"""
+
+        # 接收用户参数
+        json_dict = json.loads(request.body.decode())
+        sku_id = json_dict.get('sku_id')
+
+        # 校验数据
+        try:
+            SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('sku_id不存在')
+
+        redis_conn = get_redis_connection('history')
+        pl = redis_conn.pipeline()
+        user_id = request.user.id
+
+        # 去重
+        pl.lrem('history_%s' % user_id, 0, sku_id)
+        # 存储数据
+        pl.lpush('history_%s' % user_id, sku_id)
+        # 截取数据
+        pl.ltrim('history_%s' % user_id, 0, 4)
+        # 执行管道
+        pl.execute()
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
+
+    def get(self, request):
+        """展现用户浏览记录"""
+
+        # 获取Redis存储的sku_id列表信息
+        redis_conn = get_redis_connection('history')
+        sku_ids = redis_conn.lrange('history_%s' % request.user.id, 0, -1)
+
+        # 根据sku_ids列表数据，查询出商品sku信息
+        skus = []
+        for sku_id in sku_ids:
+            sku = SKU.objects.get(id=sku_id)
+            skus.append({
+                'id': sku.id,
+                'name': sku.name,
+                'default_image_url': sku.default_image.url,
+                'price': sku.price
+            })
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'OK','skus': skus})
+

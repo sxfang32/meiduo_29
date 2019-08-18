@@ -67,6 +67,7 @@ class ListView(View):
 
 
 class HotGoodView(View):
+    """热销商品"""
 
     def get(self, request, category_id):
 
