@@ -589,6 +589,7 @@ class UserBrowseHistory(View):
         skus = []
         for sku_id in sku_ids:
             sku = SKU.objects.get(id=sku_id)
+            # 将sku模型转成字典
             skus.append({
                 'id': sku.id,
                 'name': sku.name,

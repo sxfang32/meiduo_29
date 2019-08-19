@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^', include('verifications.urls', namespace='verifications')),
     url(r'^', include('oauth.urls', namespace='oauth')),
     url(r'^', include('areas.urls', namespace='areas')),
-    url(r'^', include('goods.urls', namespace='goods')),
+    url(r'^', include('goods.urls', namespace='goods')),  # 商品模块
+    url(r'^', include('carts.urls', namespace='goods')),  # 购物车模块
 ]
