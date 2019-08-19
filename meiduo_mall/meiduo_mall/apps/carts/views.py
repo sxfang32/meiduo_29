@@ -275,7 +275,7 @@ class CartsView(View):
             # 删除set
             pl.srem('selected_%s' % user.id, sku_id)
             pl.execute()
-            return http.JsonResponse({})
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除商品成功'})
         else:
             # 未登录用户
             # 获取cookie购物车数据
@@ -286,14 +286,14 @@ class CartsView(View):
                 cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
             else:
                 # 提前响应
-                return http.JsonResponse({'code':RETCODE.NODATAERR,'errmsg':'没有获取到数据'})
+                return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有获取到数据'})
 
             # 判断当前要删除的sku_Id在cookie大字典中是否存在
             if sku_id in cart_str:
                 # del 删除字典中指定的键值对
                 del cart_dict[sku_id]
 
-            response = http.JsonResponse({'code':RETCODE.OK, 'errmsg':'删除购物车成功'})
+            response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除购物车成功'})
             # 判断cookie购物车中字典是否已经空了
             if not cart_dict:
                 # 如果cookie购物车数据已经删除干净了，直接将浏览器上的cookie购物车数据删除
@@ -331,14 +331,14 @@ class CartsSelectedAllView(View):
             else:
                 # 取消全选：将set集合直接删除
                 redis_conn.delete('selected_%s' % user.id)
-            return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'全选成功'})
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '全选成功'})
         else:
             # 未登录用户才做cookie
             cart_str = request.COOKIES.get('carts')
             if cart_str:
                 cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
             else:
-                return http.JsonResponse({'code':RETCODE.NODATAERR, 'errmsg':'没有获取到数据'})
+                return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有获取到数据'})
 
             # 遍历购物车大字典
             for sku_id in cart_dict:
@@ -346,6 +346,6 @@ class CartsSelectedAllView(View):
                 cart_dict[sku_id]['selected'] = selected
 
             cart_str = base64.b64encode(pickle.dumps(cart_dict)).decode()
-            response = http.JsonResponse({'code': RETCODE.OK,'errmsg': '全选成功'})
+            response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '全选成功'})
             response.set_cookie('carts', cart_str)
             return response
