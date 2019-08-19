@@ -2,6 +2,7 @@ import json, pickle, base64
 from django import http
 from django.shortcuts import render
 from django.views import View
+from django_redis import get_redis_connection
 
 
 from goods.models import SKU
@@ -39,6 +40,24 @@ class CartsView(View):
         user = request.user
         if user.is_authenticated:
             # 3.1登录用户操作Redis购物车
+            """
+            hash:{sku_id_1: 1}
+            set: {sku_id_1}
+            """
+
+            # 创建redis连接对象
+            redis_conn = get_redis_connection('carts')
+            pl = redis_conn.pipeline()
+            # hincrby：如果sku_id, 就自动做增量，不存在就新增
+            pl.hincrby('cart_%s' % user.id, sku_id, count)
+            # 判断当前是否勾选，勾选就把sku_id添加到set sadd
+            if selected:
+                pl.sadd('selected_%s' % user.id, sku_id)
+
+            pl.execute()
+
+            return http.JsonResponse({'code':RETCODE.OK, 'errmsg': '添加购物车成功'})
+
             pass
         else:
             # 3.2非登录用户操作cookie购物车
