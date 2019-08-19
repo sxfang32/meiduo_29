@@ -209,8 +209,8 @@ class CartsView(View):
         if user.is_authenticated:
             # 登录用户修改redis
             # 创建redis连接对象
-            redis_conn = get_redis_connection()
-            pl = redis_conn.pipeline
+            redis_conn = get_redis_connection('carts')
+            pl = redis_conn.pipeline()
             # 修改hash中指定key对应 count
             pl.hset('cart_%s' % user.id, sku_id, count)
             # 判断当前商品是要勾选还是不勾线
@@ -306,3 +306,46 @@ class CartsView(View):
             return response
 
 
+class CartsSelectedAllView(View):
+    """购物车全选"""
+
+    def put(self, request):
+
+        # 接收请求体数据
+        json_dict = json.loads(request.body.decode())
+        selected = json_dict.get('selected')
+        # 校验
+        if isinstance(selected, bool) is False:
+            return http.HttpResponseForbidden('数据类型有误')
+
+        user = request.user
+        if user.is_authenticated:
+            # 登录用户操作redis
+            redis_conn = get_redis_connection('carts')
+            # 判断是全选还是取消全选
+            if selected:
+                # 全选：将hash中所有的sku_id添加到set
+                redis_cart = redis_conn.hgetall('cart_%s' % user.id)
+                sku_ids = redis_cart.keys()
+                redis_conn.sadd('selected_%s' % user.id, *sku_ids)
+            else:
+                # 取消全选：将set集合直接删除
+                redis_conn.delete('selected_%s' % user.id)
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'全选成功'})
+        else:
+            # 未登录用户才做cookie
+            cart_str = request.COOKIES.get('carts')
+            if cart_str:
+                cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+            else:
+                return http.JsonResponse({'code':RETCODE.NODATAERR, 'errmsg':'没有获取到数据'})
+
+            # 遍历购物车大字典
+            for sku_id in cart_dict:
+                # 将里面的每个小字典的selected改为True or False
+                cart_dict[sku_id]['selected'] = selected
+
+            cart_str = base64.b64encode(pickle.dumps(cart_dict)).decode()
+            response = http.JsonResponse({'code': RETCODE.OK,'errmsg': '全选成功'})
+            response.set_cookie('carts', cart_str)
+            return response
