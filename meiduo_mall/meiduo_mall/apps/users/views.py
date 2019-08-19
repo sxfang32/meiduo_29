@@ -536,39 +536,50 @@ class ChangePasswordView(LoginRequiredView):
         return response
 
 
-class UserBrowseHistory(LoginRequiredView, View):
-    """商品浏览记录"""
+class UserBrowseHistory(View):
+    """保存用户商品浏览记录"""
 
     def post(self, request):
         """保存浏览记录"""
+        user = request.user
+        if not user.is_authenticated:
+            # 如果用户未登录，提前响应
+            return http.JsonResponse({'code':RETCODE.SESSIONERR,'errmsg':'用户未登录'})
 
-        # 接收用户参数
+        # 1.接收用户参数sku_id
         json_dict = json.loads(request.body.decode())
         sku_id = json_dict.get('sku_id')
 
-        # 校验数据
+        # 2.校验数据
         try:
-            SKU.objects.get(id=sku_id)
+            sku = SKU.objects.get(id=sku_id, is_launched=True)
         except SKU.DoesNotExist:
             return http.HttpResponseForbidden('sku_id不存在')
 
+        # 3.创建redis连接对象
         redis_conn = get_redis_connection('history')
         pl = redis_conn.pipeline()
-        user_id = request.user.id
+        user_id = user.id
 
-        # 去重
-        pl.lrem('history_%s' % user_id, 0, sku_id)
-        # 存储数据
-        pl.lpush('history_%s' % user_id, sku_id)
-        # 截取数据
-        pl.ltrim('history_%s' % user_id, 0, 4)
-        # 执行管道
+        key = 'history_%s' % user_id
+        # 3.1去重
+        pl.lrem(key, 0, sku_id)
+        # 3.2存储数据,添加到列表开头
+        pl.lpush(key, sku_id)
+        # 3.3截取数据
+        pl.ltrim(key, 0, 4)
+        # 3.4执行管道
         pl.execute()
 
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
 
     def get(self, request):
         """展现用户浏览记录"""
+
+        user = request.user
+        if not user.is_authenticated:
+            # 如果用户未登录，提前响应
+            return http.JsonResponse({'code': RETCODE.SESSIONERR, 'errmsg': '用户未登录'})
 
         # 获取Redis存储的sku_id列表信息
         redis_conn = get_redis_connection('history')
