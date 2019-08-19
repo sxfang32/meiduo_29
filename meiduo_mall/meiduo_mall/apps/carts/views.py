@@ -4,7 +4,6 @@ from django.shortcuts import render
 from django.views import View
 from django_redis import get_redis_connection
 
-
 from goods.models import SKU
 from meiduo_mall.utils.response_code import RETCODE
 
@@ -56,7 +55,7 @@ class CartsView(View):
 
             pl.execute()
 
-            return http.JsonResponse({'code':RETCODE.OK, 'errmsg': '添加购物车成功'})
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
 
             pass
         else:
@@ -105,22 +104,67 @@ class CartsView(View):
             # 响应
             return response
 
-        pass
-
-
-
-
-
-
-
-
-
-
-
-
     def get(self, request):
         """购物车查询"""
-        pass
+        user = request.user
+        if user.is_authenticated:
+            # 登录用户从redis获取购物车数据
+            """
+                hash:{sku_id_1: 1}
+                set: {sku_id_1}
+            """
+            # 创建redis连接对象
+            redis_conn = get_redis_connection('carts')
+            # 获取hash数据
+            redis_carts = redis_conn.hgetall('cart_%s' % user.id)
+            # 获取set数据
+            selected_ids = redis_conn.smembers('selected_%s' % user.id)
+            # 将redis购物车数据格式转换成和cookie的购物车数据一致
+            cart_dict = {}  # 用来包装redis购物车的所有数据
+            for sku_id_bytes in redis_carts:
+                cart_dict[int(sku_id_bytes)] = {
+                    'count': int(redis_carts[sku_id_bytes]),
+                    'selected': sku_id_bytes in selected_ids
+                }
+
+        else:
+            # 未登录用户从cookie获取购物车数据
+            """
+           {
+             'sku_id_1':{'count':1,'selectes':True},
+             'sku_id_2':{'count':1,'selectes':True}
+           }
+           """
+            # 获取cookie中的购物车数据
+            cart_str = request.COOKIE.get('carts')
+            # 判断是否获取到
+            if cart_str:
+                # 将cart_str转换成字典
+                cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+            else:
+                return render(request, 'cart.html')
+
+        # 查询并包装购物车展示时所需要的数据
+        sku_qs = SKU.objects.filter(id__in=cart_dict.keys())
+        # 定义一个用来包装所有购物车字典的列表
+        sku_list = []
+        # 遍历sku_qs，进行模型转字典
+        for sku_mode in sku_qs:
+            # 获取当前商品的count
+            count = cart_dict[sku_mode.id]['count']
+            sku_list.append({
+                'id': sku_mode.id,
+                'name': sku_mode.name,
+                'default_image_url': sku_mode.default_image.url,
+                'price': str(sku_mode.price),  # 转成str是为了方便js中进行解析
+                'count': count,
+                'selected': str(cart_dict[sku_mode.id]['selected']),
+                'amount': str(sku_mode.price * count)
+            })
+        context = {
+            'cart_skus': sku_list
+        }
+        return render(request, 'cart.html', context)
 
     def put(self, request):
         """购物车修改"""
