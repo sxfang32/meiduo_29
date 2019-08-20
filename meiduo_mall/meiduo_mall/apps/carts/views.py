@@ -57,7 +57,6 @@ class CartsView(View):
 
             return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
 
-            pass
         else:
             # 3.2非登录用户操作cookie购物车
             # 先尝试从cookie中获取购物车数据
@@ -76,12 +75,12 @@ class CartsView(View):
                 cart_byte = base64.b64decode(cart_str_bytes)
                 cart_dict = pickle.loads(cart_byte)
 
+                # cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+
                 # 判断当前要添加的商品是否之前已经添加过，如果添加过应该累加count
                 if sku_id in cart_dict:
                     origin_count = cart_dict[sku_id]['count']
                     count += origin_count
-
-                # cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
 
             else:
                 # 如果还没有cookie购物车数据，定义一个新字典用来添加购物车数据
@@ -161,9 +160,7 @@ class CartsView(View):
                 'selected': str(cart_dict[sku_model.id]['selected']),
                 'amount': str(sku_model.price * count)
             })
-        context = {
-            'cart_skus': sku_list
-        }
+        context = {'cart_skus': sku_list}
         return render(request, 'cart.html', context)
 
     def put(self, request):
@@ -213,12 +210,12 @@ class CartsView(View):
             pl = redis_conn.pipeline()
             # 修改hash中指定key对应 count
             pl.hset('cart_%s' % user.id, sku_id, count)
-            # 判断当前商品是要勾选还是不勾线
+            # 判断当前商品是要勾选还是不勾选
             if selected:
                 # 勾选就将当前sku_id添加到set
                 pl.sadd('selected_%s' % user.id, sku_id)
             else:
-                #  不勾选就将sku_id 从 set 移除
+                # 不勾选就将sku_id 从 set 移除
                 pl.srem('selected_%s' % user.id, sku_id)
             pl.execute()
 
@@ -279,7 +276,7 @@ class CartsView(View):
         else:
             # 未登录用户
             # 获取cookie购物车数据
-            cart_str = request.COOKIES.get('cart')
+            cart_str = request.COOKIES.get('carts')
             # 判断是否获取到cookie购物车数据
             if cart_str:
                 # cart_str 转 cart_dict
@@ -288,8 +285,8 @@ class CartsView(View):
                 # 提前响应
                 return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有获取到数据'})
 
-            # 判断当前要删除的sku_Id在cookie大字典中是否存在
-            if sku_id in cart_str:
+            # 判断当前要删除的sku_d在cookie大字典中是否存在
+            if sku_id in cart_dict:
                 # del 删除字典中指定的键值对
                 del cart_dict[sku_id]
 
@@ -298,6 +295,7 @@ class CartsView(View):
             if not cart_dict:
                 # 如果cookie购物车数据已经删除干净了，直接将浏览器上的cookie购物车数据删除
                 response.delete_cookie('carts')
+                return response
             # 将 cart_dict 转 cart_str
             cart_str = base64.b64encode(pickle.dumps(cart_dict)).decode()
             # 设置cookie
