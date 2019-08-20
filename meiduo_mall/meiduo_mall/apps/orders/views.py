@@ -1,9 +1,13 @@
+import json
+from django import http
 from django.shortcuts import render
 from meiduo_mall.utils.views import LoginRequiredView
 from users.models import Address
 from goods.models import SKU
 from django_redis import get_redis_connection
 from decimal import Decimal
+from .models import OrderInfo
+from django.utils import timezone
 
 
 class OrderSettlementView(LoginRequiredView):
@@ -57,13 +61,43 @@ class OrderSettlementView(LoginRequiredView):
 
 class OrderCommitView(LoginRequiredView):
     """提交订单"""
+
     def post(self, request):
 
         # 1.接收
+        json_dict = json.loads(request.body.decode())
+        address_id = json_dict.get('adderss_id')
+        pay_method = json_dict.get('pay_method')
 
+        user = request.user
         # 2.校验
+        try:
+            address = Address.objects.get(id=address_id, user=user, is_deleted=False)
+        except Address.DoesNotExist:
+            return http.HttpResponseForbidden('adderss_id有误')
+
+        if pay_method not in [OrderInfo.PAY_METHODS_ENUM['CASH'], OrderInfo.PAY_METHODS_ENUM['ALIPAY']]:
+            return http.HttpResponseForbidden('支付方式错误')
+
+        # 生成订单编号：20190820145030+ user_id
+        order_id = timezone.now().strftime('%Y%m%d%H%M%S') + '%09d' % user.id
+
+        # 判断订单状态
+        status = (OrderInfo.ORDER_STATUS_ENUM['UNPAID']
+                  if (pay_method == OrderInfo.PAY_METHODS_ENUM['ALIPAY'])
+                  else OrderInfo.ORDER_STATUS_ENUM['UNSEND'])
 
         # 3.存储一条订单基本信息记录（一）(OrderInfo)
+        order = OrderInfo.objects.create(
+            order_id=order_id,
+            user=user,
+            address=address,
+            total_count=0,
+            total_amount=Decimal('0.00'),
+            freight=Decimal('10.00'),
+            pay_method=pay_method,
+            status=status,
+        )
 
         # 3.1 修改sku
 
