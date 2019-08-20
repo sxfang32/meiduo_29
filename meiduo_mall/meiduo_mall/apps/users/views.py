@@ -17,6 +17,7 @@ from celery_tasks.email.tasks import send_verify_email
 from .utils import generate_email_verify_url, check_email_verify_url
 from goods.models import SKU
 import logging
+from carts.utils import merge_cart_cookie_to_redis
 
 logger = logging.getLogger('django')
 
@@ -140,6 +141,8 @@ class LoginView(View):
         # 给cookie设置username
         response.set_cookie('username', user.username,
                             max_age=None if remembered is None else settings.SESSION_COOKIE_AGE)
+        # 合并购物车
+        merge_cart_cookie_to_redis(request, response)
         return response
 
 
@@ -544,7 +547,7 @@ class UserBrowseHistory(View):
         user = request.user
         if not user.is_authenticated:
             # 如果用户未登录，提前响应
-            return http.JsonResponse({'code':RETCODE.SESSIONERR,'errmsg':'用户未登录'})
+            return http.JsonResponse({'code': RETCODE.SESSIONERR, 'errmsg': '用户未登录'})
 
         # 1.接收用户参数sku_id
         json_dict = json.loads(request.body.decode())
@@ -597,5 +600,4 @@ class UserBrowseHistory(View):
                 'price': sku.price
             })
 
-        return http.JsonResponse({'code': RETCODE.OK, 'errmsg':'OK','skus': skus})
-
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'skus': skus})

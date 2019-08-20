@@ -13,6 +13,7 @@ from oauth.models import OAuthQQUser
 from .utils import generate_openid_signature, check_openid_signature
 from users.models import User
 import logging
+from carts.utils import merge_cart_cookie_to_redis
 
 logger = logging.getLogger('django')
 
@@ -140,4 +141,7 @@ class QQAuthUserView(View):
         # 将username保存到cookie中
         response = redirect(request.GET.get('state') or '/')
         response.set_cookie('username', user.username, max_age=settings.SESSION_COOKIE_AGE)
+
+        # 合并购物车
+        merge_cart_cookie_to_redis(request, response)
         return response
