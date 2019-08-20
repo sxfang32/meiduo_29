@@ -196,7 +196,7 @@ class CartsView(View):
             'default_image_url': sku_model.default_image.url,
             'price': str(sku_model.price),  # 转成str是为了方便js中进行解析
             'count': count,
-            'selected': str(selected),
+            'selected': selected,
             'amount': str(sku_model.price * count)
         }
         response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '修改购物车成功', 'cart_sku': cart_sku})
