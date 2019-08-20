@@ -124,7 +124,7 @@ class OrderCommitView(LoginRequiredView):
 
             # 判断库存
             if buy_count > origin_stock:
-                return http.JsonResponse({'code':RETCODE.STOCKERR,'errmsg':'库存不足'})
+                return http.JsonResponse({'code': RETCODE.STOCKERR, 'errmsg': '库存不足'})
 
             # 3.2 计算sku库存和销量
             new_stock = origin_stock - buy_count
@@ -140,11 +140,11 @@ class OrderCommitView(LoginRequiredView):
             spu.sales += buy_count
             spu.save()
 
-        # 4.存储订单中商品信息记录（多）（OrderGood）
-        OrderGoods.objects.create(
-            order = order,
-            sku = sku,
-            count = buy_count,
-            price = sku.price
-        )
+            # 4.存储订单中商品信息记录（多）（OrderGood）
+            OrderGoods.objects.create(
+                order=order,
+                sku=sku,
+                count=buy_count,
+                price=sku.price
+            )
         pass
