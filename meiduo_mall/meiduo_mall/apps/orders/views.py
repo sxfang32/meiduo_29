@@ -6,8 +6,9 @@ from users.models import Address
 from goods.models import SKU
 from django_redis import get_redis_connection
 from decimal import Decimal
-from .models import OrderInfo
+from .models import OrderInfo, OrderGoods
 from django.utils import timezone
+from meiduo_mall.utils.response_code import RETCODE
 
 
 class OrderSettlementView(LoginRequiredView):
@@ -82,7 +83,7 @@ class OrderCommitView(LoginRequiredView):
         # 生成订单编号：20190820145030+ user_id
         order_id = timezone.now().strftime('%Y%m%d%H%M%S') + '%09d' % user.id
 
-        # 判断订单状态
+        # 判断订单状态（三目运算法）
         status = (OrderInfo.ORDER_STATUS_ENUM['UNPAID']
                   if (pay_method == OrderInfo.PAY_METHODS_ENUM['ALIPAY'])
                   else OrderInfo.ORDER_STATUS_ENUM['UNSEND'])
@@ -99,9 +100,51 @@ class OrderCommitView(LoginRequiredView):
             status=status,
         )
 
-        # 3.1 修改sku
+        # 3.1获取购物车中redis数据
+        # 创建连接对象
+        redis_conn = get_redis_connection('cart')
+        # 获取hash和set数据
+        redis_cart = redis_conn.hgetall('cart_%s' % user.id)
+        selected_ids = redis_conn.smembers('cart_%s' % user.id)
+        # 定义一个字典用来装要购买的商品id和count
+        cart_dict = {}
+        for sku_id_bytes in selected_ids:
+            cart_dict[int(sku_id_bytes)] = int(redis_cart[sku_id_bytes])
 
-        # 3.2 修改spu
+        # 遍历要购买的商品大字典
+        for sku_id in cart_dict:
+
+            # 获取sku模型
+            sku = SKU.objects.get(id=sku_id)
+            # 获取当前商品要购买的数量
+            buy_count = cart_dict[sku_id]
+            # 获取商品原有的库存和销量
+            origin_stock = sku.stock
+            origin_sales = sku.sales
+
+            # 判断库存
+            if buy_count > origin_stock:
+                return http.JsonResponse({'code':RETCODE.STOCKERR,'errmsg':'库存不足'})
+
+            # 3.2 计算sku库存和销量
+            new_stock = origin_stock - buy_count
+            new_sales = origin_sales + buy_count
+
+            # 修改sku库存和销量
+            sku.stock = new_stock
+            sku.sales = new_sales
+            sku.save()
+
+            # 3.3 修改spu
+            spu = sku.spu
+            spu.sales += buy_count
+            spu.save()
 
         # 4.存储订单中商品信息记录（多）（OrderGood）
+        OrderGoods.objects.create(
+            order = order,
+            sku = sku,
+            count = buy_count,
+            price = sku.price
+        )
         pass
