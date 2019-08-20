@@ -53,3 +53,21 @@ class OrderSettlementView(LoginRequiredView):
             'payment_amount': total_amount + freight
         }
         return render(request, 'place_order.html', context)
+
+
+class OrderCommitView(LoginRequiredView):
+    """提交订单"""
+    def post(self, request):
+
+        # 1.接收
+
+        # 2.校验
+
+        # 3.存储一条订单基本信息记录（一）(OrderInfo)
+
+        # 3.1 修改sku
+
+        # 3.2 修改spu
+
+        # 4.存储订单中商品信息记录（多）（OrderGood）
+        pass
