@@ -80,11 +80,11 @@
                                 {% endfor %}
                             </div>
                             <div class="level2">
-                                {% for sub_cat in category.cat_subs %}
+                                {% for sub_cat in category.sub_cats %}
                                     <div class="list_group">
                                         <div class="group_name fl">{{ sub_cat.name }} &gt;</div>
                                         <div class="group_detail fl">
-                                            {% for sub_cat3 in sub_cat.cat_subs %}
+                                            {% for sub_cat3 in sub_cat.sub_cats %}
                                                 <a href="/list/{{ sub_cat3.id }}/1/">{{ sub_cat3.name }}</a>
                                             {% endfor %}
                                         </div>

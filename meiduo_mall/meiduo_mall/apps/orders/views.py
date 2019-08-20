@@ -7,13 +7,13 @@ from django.utils import timezone
 from django.db import transaction
 import logging
 
-logger = logging.getLogger('django')
-
 from meiduo_mall.utils.views import LoginRequiredView
 from users.models import Address
 from goods.models import SKU
 from .models import OrderInfo, OrderGoods
 from meiduo_mall.utils.response_code import RETCODE
+
+logger = logging.getLogger('django')
 
 
 class OrderSettlementView(LoginRequiredView):
@@ -93,7 +93,7 @@ class OrderCommitView(LoginRequiredView):
                   if (pay_method == OrderInfo.PAY_METHODS_ENUM['ALIPAY'])
                   else OrderInfo.ORDER_STATUS_ENUM['UNSEND'])
 
-        with transaction.atomic():   # 手动开启事务
+        with transaction.atomic():  # 手动开启事务
 
             # 创建事务的保存点
             save_point = transaction.savepoint()
@@ -135,7 +135,6 @@ class OrderCommitView(LoginRequiredView):
 
                         # 判断库存
                         if buy_count > origin_stock:
-
                             # 回滚
                             transaction.savepoint_rollback(save_point)
 
@@ -151,7 +150,8 @@ class OrderCommitView(LoginRequiredView):
                         # sku.save()
 
                         # 使用乐观锁解决同时下单的问题
-                        result = SKU.objects.filter(id=sku_id, stock=origin_stock).update(stock=new_stock,sales=new_sales)
+                        result = SKU.objects.filter(id=sku_id, stock=origin_stock).update(stock=new_stock,
+                                                                                          sales=new_sales)
                         # 如果修改库存销量失败
                         if result == 0:
                             continue
@@ -184,15 +184,15 @@ class OrderCommitView(LoginRequiredView):
                 logger.error(error)
                 # 如果出现问题，就暴力回滚数据
                 transaction.savepoint_rollback(save_point)
-                return http.JsonResponse({'code':RETCODE.DBERR,'errmsg':'下单失败'})
+                return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '下单失败'})
             else:
-                #提交事务
+                # 提交事务
                 transaction.savepoint_commit(save_point)
 
-        # pl = redis_conn.pipeline()
-        # # 删除购物车中已被购买的商品
-        # pl.hdel('cart_%s' % user.id, *selected_ids)  # 将hash中已购买商品全部移除
-        # pl.delete('selected_%s' % user.id)  # 将set移除
-        # pl.execute()
+        pl = redis_conn.pipeline()
+        # 删除购物车中已被购买的商品
+        pl.hdel('cart_%s' % user.id, *selected_ids)  # 将hash中已购买商品全部移除
+        pl.delete('selected_%s' % user.id)  # 将set移除
+        pl.execute()
 
-        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '下单成功','order_id': order_id})
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '下单成功', 'order_id': order_id})
