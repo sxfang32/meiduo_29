@@ -67,7 +67,7 @@ class OrderCommitView(LoginRequiredView):
 
         # 1.接收
         json_dict = json.loads(request.body.decode())
-        address_id = json_dict.get('adderss_id')
+        address_id = json_dict.get('address_id')
         pay_method = json_dict.get('pay_method')
 
         user = request.user
@@ -75,7 +75,7 @@ class OrderCommitView(LoginRequiredView):
         try:
             address = Address.objects.get(id=address_id, user=user, is_deleted=False)
         except Address.DoesNotExist:
-            return http.HttpResponseForbidden('adderss_id有误')
+            return http.HttpResponseForbidden('address_id有误')
 
         if pay_method not in [OrderInfo.PAY_METHODS_ENUM['CASH'], OrderInfo.PAY_METHODS_ENUM['ALIPAY']]:
             return http.HttpResponseForbidden('支付方式错误')
@@ -102,10 +102,10 @@ class OrderCommitView(LoginRequiredView):
 
         # 3.1获取购物车中redis数据
         # 创建连接对象
-        redis_conn = get_redis_connection('cart')
+        redis_conn = get_redis_connection('carts')
         # 获取hash和set数据
         redis_cart = redis_conn.hgetall('cart_%s' % user.id)
-        selected_ids = redis_conn.smembers('cart_%s' % user.id)
+        selected_ids = redis_conn.smembers('selected_%s' % user.id)
         # 定义一个字典用来装要购买的商品id和count
         cart_dict = {}
         for sku_id_bytes in selected_ids:
@@ -147,4 +147,20 @@ class OrderCommitView(LoginRequiredView):
                 count=buy_count,
                 price=sku.price
             )
-        pass
+
+            # 累加购买商品总数量
+            order.total_count += buy_count
+            # 累加商品总价
+            order.total_amount += (sku.price * buy_count)
+
+        # 累加运费一定要写在for外面
+        order.total_amount += order.freight
+        order.save()
+
+        # pl = redis_conn.pipeline()
+        # # 删除购物车中已被购买的商品
+        # pl.hdel('cart_%s' % user.id, *selected_ids)  # 将hash中已购买商品全部移除
+        # pl.delete('selected_%s' % user.id)  # 将set移除
+        # pl.execute()
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '下单成功','order_id': order_id})
