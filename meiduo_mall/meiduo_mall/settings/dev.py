@@ -101,11 +101,11 @@ DATABASES = {
     },
     'slave': {  # 读（从机）
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '192.168.103.210',
+        'HOST': '192.168.27.128',
         'PORT': 8306,
         'USER': 'root',
         'PASSWORD': 'mysql',
-        'NAME': 'meiduo_mall'
+        'NAME': 'meiduo_29'
     }
 }
 
