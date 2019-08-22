@@ -199,7 +199,8 @@ class OrderCommitView(LoginRequiredView):
 
 
 class OrderSuccessView(LoginRequiredView):
-    """提交成功页面"""
+    """展示订单提交成功页面"""
+
     def get(self, request):
 
         # 接收数据
@@ -214,6 +215,7 @@ class OrderSuccessView(LoginRequiredView):
         except OrderInfo.DoesNotExist:
             return http.HttpResponseForbidden('订单有误')
 
+        # 展示数据
         context = {
             'order_id': order_id,
             'payment_amount': payment_amount,
