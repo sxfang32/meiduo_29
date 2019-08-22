@@ -52,7 +52,7 @@ class OrderSettlementView(LoginRequiredView):
             total_count += sku.count
             total_amount += (sku.amount)
 
-        freight = Decimal('10.00')  # 运费
+        freight = Decimal('10.00')  # 哈哈这运费去到偏远地区怕是要亏死哦
 
         context = {
             'addresses': addresses,
@@ -196,3 +196,28 @@ class OrderCommitView(LoginRequiredView):
         pl.execute()
 
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '下单成功', 'order_id': order_id})
+
+
+class OrderSuccessView(LoginRequiredView):
+    """提交成功页面"""
+    def get(self, request):
+
+        # 接收数据
+        query_dict = request.GET
+        order_id = query_dict.get('order_id')
+        payment_amount = query_dict.get('payment_amount')
+        pay_method = query_dict.get('pay_method')
+
+        # 校验数据
+        try:
+            order = OrderInfo.objects.get(order_id=order_id, total_amount=payment_amount, pay_method=pay_method)
+        except OrderInfo.DoesNotExist:
+            return http.HttpResponseForbidden('订单有误')
+
+        context = {
+            'order_id': order_id,
+            'payment_amount': payment_amount,
+            'pay_method': pay_method
+        }
+
+        return render(request, 'order_success.html', context)

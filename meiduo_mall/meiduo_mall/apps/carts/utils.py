@@ -11,7 +11,7 @@ def merge_cart_cookie_to_redis(request, response):
     if cart_str is None:
         return
 
-        # 把字符串转成字典
+    # 把字符串转成字典
     cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
     # 创建redis连接对象
     redis_conn = get_redis_connection('carts')
