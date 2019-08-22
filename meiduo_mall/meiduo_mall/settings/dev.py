@@ -46,10 +46,11 @@ INSTALLED_APPS = [
     'areas.apps.AreasConfig',  # 省市区模块
     'contents.apps.ContentsConfig',  # 首页模块
     'goods.apps.GoodsConfig',  # 商品模块
-    'orders.apps.OrdersConfig', # 订单模块
+    'orders.apps.OrdersConfig',  # 订单模块
     'payment.apps.PaymentConfig',
 
     'haystack',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -89,7 +90,7 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': {  # 写（主机）
         'ENGINE': 'django.db.backends.mysql',
         'HOST': '192.168.27.128',  # 数据库主机
         'PORT': 3306,  # 数据库端口
@@ -97,6 +98,14 @@ DATABASES = {
         'PASSWORD': 'meiduo_29',  # 数据库用户密码
         'NAME': 'meiduo_29'  # 数据库名字
 
+    },
+    'slave': {  # 读（从机）
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': '192.168.103.210',
+        'PORT': 8306,
+        'USER': 'root',
+        'PASSWORD': 'mysql',
+        'NAME': 'meiduo_mall'
     }
 }
 
@@ -123,14 +132,14 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "history": { # 用户浏览记录
+    "history": {  # 用户浏览记录
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://192.168.27.128:6379/3",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "carts": { # 用户浏览记录
+    "carts": {  # 用户浏览记录
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://192.168.27.128:6379/4",
         "OPTIONS": {
@@ -267,10 +276,25 @@ ALIPAY_RETURN_URL = 'http://www.meiduo.site:8000/payment/status/'
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://192.168.27.128:9200/', # Elasticsearch服务器ip地址，端口号固定为9200
-        'INDEX_NAME': 'meiduo_mall', # Elasticsearch建立的索引库的名称
+        'URL': 'http://192.168.27.128:9200/',  # Elasticsearch服务器ip地址，端口号固定为9200
+        'INDEX_NAME': 'meiduo_mall',  # Elasticsearch建立的索引库的名称
     },
 }
 
 # 当添加、修改、删除数据时，自动生成索引
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+# 分页数量
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5
+
+CRONJOBS = [
+    # 每1分钟生成一次首页静态文件
+    ('*/1 * * * *', 'contents.crons.generate_static_index_html',
+     '>> ' + os.path.join(os.path.dirname(BASE_DIR), 'logs/crontab.log'))
+]
+
+# 解决页面静态化编码问题
+CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
+
+# 数据库读写分离
+DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
