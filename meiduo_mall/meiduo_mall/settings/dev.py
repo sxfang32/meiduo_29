@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'areas.apps.AreasConfig',  # 省市区模块
     'contents.apps.ContentsConfig',  # 首页模块
     'goods.apps.GoodsConfig',  # 商品模块
-    'orders.apps.OrdersConfig' # 订单模块
+    'orders.apps.OrdersConfig', # 订单模块
+    'payment.apps.PaymentConfig',
 ]
 
 MIDDLEWARE = [
@@ -253,3 +254,9 @@ DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
 
 # 指定远程图片文件的绝对路径前半段（路由）
 FDFS_BASE_URL = 'http://image.meiduo.site:8888/'
+
+# 支付宝
+ALIPAY_APPID = '2016101400684429'
+ALIPAY_DEBUG = True  # 表示是沙箱环境还是真实支付环境
+ALIPAY_URL = 'https://openapi.alipaydev.com/gateway.do'
+ALIPAY_RETURN_URL = 'http://www.meiduo.site:8000/payment/status/'
