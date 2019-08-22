@@ -296,5 +296,8 @@ CRONJOBS = [
 # 解决页面静态化编码问题
 CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
 
-# 数据库读写分离
+# 指定数据文件
 DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
+
+# 静态文件收集目录
+STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
