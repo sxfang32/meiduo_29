@@ -27,4 +27,5 @@ urlpatterns = [
     url(r'^', include('carts.urls', namespace='carts')),  # 购物车模块
     url(r'^', include('orders.urls', namespace='orders')),  # 订单模块
     url(r'^', include('payment.urls', namespace='payment')),  # 支付模块
+    url(r'^search/', include('haystack.urls')),
 ]

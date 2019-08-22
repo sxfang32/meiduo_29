@@ -76,7 +76,7 @@ class PaymentStatusView(LoginRequiredView):
             sign_type="RSA2",  # RSA 或者 RSA2
             debug=settings.ALIPAY_DEBUG)  # 默认False
 
-        # 2.调用alipay的verify方法进行插眼支付结果
+        # 2.调用alipay的verify方法进行查验支付结果
         success = alipay.verify(data, signature)
         # 如果支付正常
         if success:
