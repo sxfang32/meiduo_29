@@ -237,10 +237,8 @@ class UserCenterOrder(LoginRequiredView):
 
         # 获取用户对象
         user = request.user
-
         # 查看当前登录用户所有订单和购买商品
-        order_qs = OrderInfo.objects.filter(user_id=user.id).order_by('status')
-
+        order_qs = OrderInfo.objects.filter(user_id=user.id).order_by('-create_time')
         # 遍历当前用户的订单表，以字典的形式将数据包装
         for order in order_qs:
             # 查询订单的所有商品
@@ -252,8 +250,9 @@ class UserCenterOrder(LoginRequiredView):
                 sku.price = sku.sku.price
                 sku.amount = sku.price * sku.count
             order.sku_list = sku_list
-            method_index = int(order.pay_method) - 1
-            status_index = int(order.status) - 1
+
+            method_index = order.pay_method - 1
+            status_index = order.status - 1
             # 给order添加pay_method_name和status_name属性
             order.pay_method_name = OrderInfo.PAY_METHOD_CHOICES[method_index][1]
             order.status_name = OrderInfo.ORDER_STATUS_CHOICES[status_index][1]

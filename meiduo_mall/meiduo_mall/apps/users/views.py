@@ -601,3 +601,57 @@ class UserBrowseHistory(View):
             })
 
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'skus': skus})
+
+
+class FindPasswordView(View):
+    """展示找回密码界面"""
+
+    def get(self, request):
+        return render(request, 'find_password.html')
+
+
+class CheckUserView(View):
+    """找回密码输入账户"""
+
+    def get(self, request, username):
+        query_dict = request.GET
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return http.JsonResponse({'error': '用户名或手机号不存在'}, status=404)
+        verify_codes = query_dict.get('text')
+        uuid = query_dict.get('image_code_id')
+
+        mobile = user.mobile
+
+        if all([username, verify_codes]) is False:
+            return http.HttpResponseForbidden('参数不全')
+
+        # # 判断用户名是否存在
+        # count_username = User.objects.filter(username=username)
+        # if not count_username:
+        #     return http.JsonResponse({'status': 404})
+
+        # 判断验证码是否正确
+        if all([verify_codes, uuid]) is False:
+            return http.HttpResponseForbidden('缺少必传参数')
+        # 创建redis连接
+        redis_conn = get_redis_connection('verify_codes')
+        # 将redis中的图形验证码字符串获取出来.这是一个字节类型的数据
+        image_code_server_bytes = redis_conn.get(uuid)
+        # 图形验证码从redis获取出来之后就从Redis数据库中删除:让图形验证码只能用一次
+        redis_conn.delete(uuid)
+        # 判断redis中是否获取到图形验证码(判断是否过期)
+        if image_code_server_bytes is None:
+            return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '图形验证码错误'})
+        # 从redis获取出来的数据注意数据类型问题byte，先进行decode操作
+        image_code_server = image_code_server_bytes.decode()
+        # 判断时要注意字典大小写问题
+        if verify_codes.lower() != image_code_server.lower():
+            return http.JsonResponse({'error': '验证码错误'}, status=400)
+
+        access_token = user.password
+
+        return http.JsonResponse({'message': 'ok', 'mobile': mobile, 'access_token': access_token})
+
+
