@@ -1,11 +1,13 @@
 import json
 from django import http
+from django.core.paginator import Paginator, EmptyPage
 from django.shortcuts import render
 from django_redis import get_redis_connection
 from decimal import Decimal
 from django.utils import timezone
 from django.db import transaction
 import logging
+import re
 
 from meiduo_mall.utils.views import LoginRequiredView
 from users.models import Address
@@ -223,3 +225,53 @@ class OrderSuccessView(LoginRequiredView):
         }
 
         return render(request, 'order_success.html', context)
+
+
+class UserCenterOrder(LoginRequiredView):
+    """用户中心订单"""
+
+    def get(self, request, page_num):
+
+        if re.match("\d+", page_num) is False:
+            return http.HttpResponseForbidden('参数错误')
+
+        # 获取用户对象
+        user = request.user
+
+        # 查看当前登录用户所有订单和购买商品
+        order_qs = OrderInfo.objects.filter(user_id=user.id).order_by('status')
+
+        # 遍历当前用户的订单表，以字典的形式将数据包装
+        for order in order_qs:
+            # 查询订单的所有商品
+            sku_list = order.skus.all()
+            # 遍历订单商品查询集
+            for sku in sku_list:
+                sku.default_image = sku.sku.default_image
+                sku.name = sku.sku.name
+                sku.price = sku.sku.price
+                sku.amount = sku.price * sku.count
+            order.sku_list = sku_list
+            method_index = int(order.pay_method) - 1
+            status_index = int(order.status) - 1
+            # 给order添加pay_method_name和status_name属性
+            order.pay_method_name = OrderInfo.PAY_METHOD_CHOICES[method_index][1]
+            order.status_name = OrderInfo.ORDER_STATUS_CHOICES[status_index][1]
+
+        # 分页功能
+        paginator = Paginator(order_qs, 5)  # 创建一个分页对象
+        try:
+            page_skus = paginator.page(page_num)  # 返回指定页的数据
+        except EmptyPage:
+            return http.HttpResponseForbidden('没有下一页，别点了')
+        total_page = paginator.num_pages  # 获取总页数
+
+        context = {
+            'page_orders': page_skus,
+            'total_page': total_page,
+            'page_num': page_num
+        }
+
+        # 将数据响应给前端
+
+        return render(request, 'user_center_order.html', context)
