@@ -67,3 +67,28 @@ def check_email_verify_url(token):
             return None
     except BadData:
         return None
+
+
+def generate_access_token(user):
+    """对access_token加密"""
+    serializer = Serializer(settings.SECRET_KEY, 3600 * 24)
+    data = {'user_id': user.id}
+    access_token = serializer.dumps(data).decode()
+    return access_token
+
+
+def check_access_token(access_token):
+    """对access_token解密"""
+    serializer = Serializer(settings.SECRET_KEY, 3600 * 24)
+    try:
+        # 如果解密失败抛BadData异常
+        data = serializer.loads(access_token)
+        user_id = data.get('user_id')
+        try:
+            # 如果查不到信息抛DoesNotExist异常
+            user = User.objects.get(id=user_id)
+            return user
+        except User.DoesNotExist:
+            return None
+    except BadData:
+        return None

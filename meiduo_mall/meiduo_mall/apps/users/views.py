@@ -9,6 +9,7 @@ from django import http
 from django.conf import settings
 import re
 from django_redis import get_redis_connection
+from itsdangerous import Serializer, BadData
 
 from meiduo_mall.utils.response_code import RETCODE
 from verifications.constants import IMAGE_CODE_EXPIRE, SEND_SMS_TIME
@@ -16,7 +17,7 @@ from .models import User, Address
 from meiduo_mall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
 from celery_tasks.sms.tasks import send_sms_code
-from .utils import generate_email_verify_url, check_email_verify_url
+from .utils import generate_email_verify_url, check_email_verify_url, generate_access_token, check_access_token
 from goods.models import SKU
 import logging
 from carts.utils import merge_cart_cookie_to_redis
@@ -652,24 +653,32 @@ class CheckUserView(View):
         if verify_codes.lower() != image_code_server.lower():
             return http.JsonResponse({'error': '验证码错误'}, status=400)
 
-        access_token = user.password
+        # 加密一个access_token
+        access_token = generate_access_token(user)
 
         response = http.JsonResponse({'message': 'ok', 'mobile': mobile, 'access_token': access_token})
-        response.set_cookie('mobile', mobile,max_age=3600)
+        response.set_cookie('mobile', mobile, max_age=3600)
         return response
+
 
 class SMSMobileView(View):
     """发送手机短信验证码"""
+
     def get(self, request):
         query_dict = request.GET
         access_token = query_dict.get('access_token')
         mobile = request.COOKIES.get('mobile')
 
-        user = User.objects.filter(mobile=mobile)
-        if user is None:
-            return http.JsonResponse({'error':'手机号不存在'},status=404)
+        # 对access_token解密
 
-        if access_token:
+        ver_token = check_access_token(access_token)
+
+        try:
+            user = User.objects.get(mobile=mobile)
+        except User.DoesNotExist:
+            return http.JsonResponse({'error': '用户名或手机号不存在'}, status=404)
+
+        if user == ver_token:
             sms_code = '%06d' % random.randint(0, 999999)
             print(sms_code)
             # 创建Redis管道
@@ -689,25 +698,72 @@ class SMSMobileView(View):
             # 利用容联云平台进行发送短信
             send_sms_code.delay(mobile, sms_code)  # 将发短信的函数内存添加到仓库中，让worker去新的线程执行
 
-            sms_code_server_bytes = redis_conn.get('sms_%s' % mobile)
-            # 短信验证码从redis获取出来之后就从Redis数据库中删除:让图形验证码只能用一次
-            redis_conn.delete('sms_%s' % mobile)
-            # 判断redis中是否获取到短信验证码(判断是否过期)
-            if sms_code_server_bytes is None:
-                return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码错误'})
-            # 从redis获取出来的数据注意数据类型问题byte
-            sms_code_server = sms_code_server_bytes.decode()
-            # 判断短信验证码是否相等
-            if sms_code != sms_code_server:
-                return http.JsonResponse({'error':'验证码错误'},status=400)
-
             # 响应
             return http.JsonResponse({'message': 'OK'})
 
 
-class AlterPasswordView(View):
-    """修改密码"""
-    def post(self, request):
-        pass
+class CheckSMSView(View):
+    """校验短信验证码"""
+
+    def get(self, request, username):
+        query_dict = request.GET
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return http.HttpResponseForbidden('用户名不存在')
+        sms_code = query_dict.get('sms_code')
+        mobile = request.COOKIES.get('mobile')
+
+        redis_conn = get_redis_connection('verify_codes')
+
+        sms_code_server_bytes = redis_conn.get('sms_%s' % mobile)
+        # 短信验证码从redis获取出来之后就从Redis数据库中删除:让图形验证码只能用一次
+        redis_conn.delete('sms_%s' % mobile)
+        # 判断redis中是否获取到短信验证码(判断是否过期)
+        if sms_code_server_bytes is None:
+            return http.JsonResponse({'code': RETCODE.IMAGECODEERR, 'errmsg': '短信验证码错误'})
+        # 从redis获取出来的数据注意数据类型问题byte
+        sms_code_server = sms_code_server_bytes.decode()
+        # 判断短信验证码是否相等
+        if sms_code != sms_code_server:
+            return http.JsonResponse({'error': '验证码错误'}, status=400)
+
+        # 封装access_token
+        access_token = generate_access_token(user)
+
+        resopnse = http.JsonResponse({'user_id': user.id, 'access_token': access_token})
+        resopnse.set_cookie('mobile', mobile)
+        return resopnse
 
 
+class ResetPasswordView(View):
+    """重置密码"""
+
+    def post(self, request, user_id):
+        json_dict = json.loads(request.body.decode())
+        access_token = json_dict.get('access_token')
+        ver_token = check_access_token(access_token)
+        password = json_dict.get('password')
+        password2 = json_dict.get('password2')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return http.JsonResponse({'error': '用户错误'}, status=400)
+
+        if all([password, password2]) is False:
+            return http.HttpResponseForbidden('缺少必传参数')
+
+        if not re.match(r'^[a-zA-Z0-9]{8,20}$', password):
+            return http.JsonResponse({'error': '密码最少8位，最长20位'}, status=400)
+
+        if password2 != password:
+            return http.JsonResponse({'error': '两次密码不一致'}, status=400)
+
+        if ver_token != user:
+            return http.JsonResponse({'error': '用户数据错误'}, status=400)
+
+        else:
+            user.set_password(password)
+            user.save()
+
+            return http.JsonResponse({'message': 'ok'})

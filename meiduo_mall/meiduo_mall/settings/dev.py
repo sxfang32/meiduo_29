@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'goods.apps.GoodsConfig',  # 商品模块
     'orders.apps.OrdersConfig',  # 订单模块
     'payment.apps.PaymentConfig',
+    'weibo.apps.WeiboConfig',
+
 
     'haystack',
     'django_crontab',
@@ -301,3 +303,12 @@ DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
 
 # 静态文件收集目录
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
+
+# #微博登录配置
+# APP_KEY = '4003951212'
+# APP_SECRET = '6cd2b96b33185a3d7ab7bcdc6b36d0e6'
+# REDIRECT_URI = 'http://www.meiduo.site:8000/oauth2/'
+
+APP_KEY = '1814577788'
+APP_SECRET = 'e0e03ccb70ea63c9da6d845e0e80e85d'
+REDIRECT_URI = 'http://www.meiduo.site:8000/wboauth_callback'

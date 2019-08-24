@@ -57,7 +57,7 @@ var vm = new Vue({
         // 微博登录
         weibo_login: function(){
             var next = get_query_string('next') || '/';
-            var url = this.host + '/sina/login/?next=' + next;
+            var url = this.host + '/sina/authorization/?next=' + next;
             axios.get(url, {
                     responseType: 'json'
                 })

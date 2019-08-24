@@ -21,5 +21,7 @@ urlpatterns = [
     url(r'^find_password/$', views.FindPasswordView.as_view()),  # 展示找回密码
     url(r'^accounts/(?P<username>[a-zA-Z0-9_-]{5,20})/sms/token/$', views.CheckUserView.as_view()),  # 验证身份
     url(r'^sms_codes/$', views.SMSMobileView.as_view()),  # 验证身份
+    url(r'^accounts/(?P<username>[a-zA-Z0-9_-]{5,20})/password/token/$', views.CheckSMSView.as_view()),  # 验证短信
+    url(r'^users/(?P<user_id>\d+)/password/$', views.ResetPasswordView.as_view()),  # 重置密码
 
 ]
