@@ -676,7 +676,10 @@ html,body{height:100%}
 .bar_code_con{width:167px;height:172px;margin:0px auto;}
 .bar_code_tip{text-align:center;margin-top:10px;font-size:12px;}
 .third_party{border-top:1px solid #e0e0e0;margin-top:30px}
-.qq_login,.weixin_login,.register_btn{float:left;line-height:30px;margin-left:15px;margin-top:7px;color:#666;font-size:12px;text-indent:22px;background:url(../images/QQ-weixin.png) left 7px no-repeat;}
+.qq_login,.weixin_login,.register_btn,.weibo_login{float:left;line-height:30px;margin-left:15px;margin-top:7px;color:#666;font-size:12px;text-indent:22px;background:url(../images/QQ-weixin.png) left 7px no-repeat;}
+.weibo_login{float:left;line-height:30px;margin-left:15px;margin-top:7px;color:#666;font-size:12px;text-indent:22px;background:url(../images/Weibo.ico) left 7px no-repeat;;background-size: 35px 35px;background-position: -75% 40%;}
+
+
 .qq_login:hover,.weixin_login:hover,.register_btn:hover{color:#e3101e;text-decoration:underline}
 .weixin_login{background-position:left -35px;}
 .register_btn{background:url(../images/icons02.png) left 9px no-repeat;float:right;margin-right:15px}
@@ -886,7 +889,7 @@ html,body{height:100%}
 .order_goods_list .col02{width:50%;text-align:left;}
 .order_goods_list .col02 span{
 	float: left;
-	width: 170px;
+	width: 197px;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;

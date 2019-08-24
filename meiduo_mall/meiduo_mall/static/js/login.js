@@ -5,12 +5,11 @@ var vm = new Vue({
     data: {
         host,
         error_username: false,
-        error_password: false,
-		error_username_message: '请输入5-20个字符的用户名',
-		error_password_message: '请输入8-12位的密码',
+		error_pwd_message: '',
+        error_pwd: false,
         username: '',
         password: '',
-        remembered: true
+        remembered: false
     },
     methods: {
         // 检查账号
@@ -44,7 +43,7 @@ var vm = new Vue({
         // qq登录
         qq_login: function(){
             var next = get_query_string('next') || '/';
-            var url = this.host + '/qq/login/?next=' + next;
+            var url = this.host + '/qq/authorization/?next=' + next;
             axios.get(url, {
                     responseType: 'json'
                 })
@@ -55,8 +54,7 @@ var vm = new Vue({
                     console.log(error.response);
                 })
         },
-
-         // 微博登录
+        // 微博登录
         weibo_login: function(){
             var next = get_query_string('next') || '/';
             var url = this.host + '/sina/login/?next=' + next;
@@ -72,3 +70,6 @@ var vm = new Vue({
         }
     }
 });
+
+
+

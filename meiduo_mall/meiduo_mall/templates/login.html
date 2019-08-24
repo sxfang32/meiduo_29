@@ -13,7 +13,8 @@
 <body>
 <div id="app" v-cloak>
     <div class="login_top clearfix">
-        <a href="index.html" class="login_logo"><img src="../static/images/logo02.png"></a>
+        <a href="/" class="login_logo"><img src="../static/images/logo02.png"></a>
+{#        <a href="index.html" class="login_logo"><img src="../static/images/logo02.png"></a>#}
     </div>
     <div class="login_form_bg">
         <div class="login_form_wrap clearfix">
@@ -30,7 +31,7 @@
                             <input type="text" name="username" v-model="username" @blur="check_username"
                                    class="name_input" placeholder="请输入用户">
                             <div class="user_error" v-show="error_username">[[ error_username_message ]]</div>
-                            <input type="password" name="pwd" v-model="password" @blur="check_pwd" class="pass_input"
+                            <input type="password" name="password" v-model="password" @blur="check_pwd" class="pass_input"
                                    placeholder="请输入密码">
                             <div class="pwd_error" v-show="error_password">[[ error_password_message ]]</div>
                             <div class="more_input clearfix">

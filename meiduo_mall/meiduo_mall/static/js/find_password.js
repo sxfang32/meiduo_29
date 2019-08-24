@@ -43,25 +43,25 @@ var vm = new Vue({
             'step-4': false
         },
     },
-    created: function(){
+    created: function () {
         this.generate_image_code();
     },
     methods: {
         // 生成uuid
-        generate_uuid: function(){
+        generate_uuid: function () {
             var d = new Date().getTime();
-            if(window.performance && typeof window.performance.now === "function"){
+            if (window.performance && typeof window.performance.now === "function") {
                 d += performance.now(); //use high-precision timer if available
             }
-            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = (d + Math.random()*16)%16 | 0;
-                d = Math.floor(d/16);
-                return (c =='x' ? r : (r&0x3|0x8)).toString(16);
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
             });
             return uuid;
         },
         // 生成一个图片验证码的编号，并设置页面中图片验证码img标签的src属性
-        generate_image_code: function(){
+        generate_image_code: function () {
             // 生成一个编号
             // 严格一点的使用uuid保证编号唯一， 不是很严谨的情况下，也可以使用时间戳
             this.image_code_id = this.generate_uuid();
@@ -70,7 +70,7 @@ var vm = new Vue({
             this.image_code_url = this.host + "/image_codes/" + this.image_code_id + "/";
         },
         // 检查数据
-        check_username: function(){
+        check_username: function () {
             if (!this.username) {
                 this.error_username_message = '请填写用户名或手机号';
                 this.error_username = true;
@@ -78,7 +78,7 @@ var vm = new Vue({
                 this.error_username = false;
             }
         },
-        check_image_code: function(){
+        check_image_code: function () {
             if (!this.image_code) {
                 this.error_image_code_message = '请填写验证码';
                 this.error_image_code = true;
@@ -86,8 +86,8 @@ var vm = new Vue({
                 this.error_image_code = false;
             }
         },
-        check_sms_code: function(){
-            if(!this.sms_code){
+        check_sms_code: function () {
+            if (!this.sms_code) {
                 this.error_sms_code_message = '请填写短信验证码';
                 this.error_sms_code = true;
             } else {
@@ -96,14 +96,14 @@ var vm = new Vue({
         },
 
         // 第一步表单提交, 获取手机号与发送短信的token
-        form_1_on_submit: function(){
+        form_1_on_submit: function () {
             this.check_username();
             this.check_image_code();
 
             if (this.error_username == false && this.error_image_code == false) {
-                axios.get(this.host+'/accounts/' + this.username + '/sms/token/?text='+ this.image_code + '&image_code_id=' + this.image_code_id, {
-                        responseType: 'json'
-                    })
+                axios.get(this.host + '/accounts/' + this.username + '/sms/token/?text=' + this.image_code + '&image_code_id=' + this.image_code_id, {
+                    responseType: 'json'
+                })
                     .then(response => {
                         this.mobile = response.data.mobile;
                         this.access_token = response.data.access_token;
@@ -128,14 +128,14 @@ var vm = new Vue({
 
         // 第二步
         // 发送短信验证码
-        send_sms_code: function(){
+        send_sms_code: function () {
             if (this.sending_flag == true) {
                 return;
             }
             this.sending_flag = true;
-            axios.get(this.host+'/sms_codes/?access_token='+ this.access_token, {
-                    responseType: 'json'
-                })
+            axios.get(this.host + '/sms_codes/?access_token=' + this.access_token, {
+                responseType: 'json'
+            })
                 .then(response => {
                     // 表示后端发送短信成功
                     // 倒计时60秒，60秒后允许用户再次点击发送短信验证码的按钮
@@ -162,12 +162,12 @@ var vm = new Vue({
                 })
         },
         // 第二步表单提交，验证手机号，获取修改密码的access_token
-        form_2_on_submit: function(){
+        form_2_on_submit: function () {
             this.check_sms_code();
             if (this.error_sms_code == false) {
                 axios.get(this.host + '/accounts/' + this.username + '/password/token/?sms_code=' + this.sms_code, {
-                        responseType: 'json'
-                    })
+                    responseType: 'json'
+                })
                     .then(response => {
                         this.user_id = response.data.user_id;
                         this.access_token = response.data.access_token;
@@ -180,7 +180,7 @@ var vm = new Vue({
                         if (error.response.status == 400) {
                             this.error_sms_code_message = '验证码错误';
                             this.error_sms_code = true;
-                        } else if(error.response.status == 404){
+                        } else if (error.response.status == 404) {
                             this.error_sms_code_message = '手机号不存在';
                             this.error_sms_code = true;
                         } else {
@@ -192,32 +192,36 @@ var vm = new Vue({
         },
 
         // 第三步
-        check_pwd: function (){
+        check_pwd: function () {
             var len = this.password.length;
-            if(len<8||len>20) {
+            if (len < 8 || len > 20) {
                 this.error_password = true;
             } else {
                 this.error_password = false;
             }
         },
-        check_cpwd: function (){
-            if(this.password!=this.password2) {
+        check_cpwd: function () {
+            if (this.password != this.password2) {
                 this.error_check_password = true;
             } else {
                 this.error_check_password = false;
             }
         },
-        form_3_on_submit: function(){
+        form_3_on_submit: function () {
             this.check_pwd();
             this.check_cpwd();
             if (this.error_password == false && this.error_check_password == false) {
-                axios.post(this.host + '/users/'+ this.user_id +'/password/', {
-                        password: this.password,
-                        password2: this.password2,
-                        access_token: this.access_token
-                    }, {
-                        responseType: 'json'
-                    })
+                axios.post(this.host + '/users/' + this.user_id + '/password/', {
+                    password: this.password,
+                    password2: this.password2,
+                    access_token: this.access_token
+                }, {
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    responseType: 'json',
+                    withCredentials: true
+                })
                     .then(response => {
                         this.step_class['step-4'] = true;
                         this.step_class['step-3'] = false;
