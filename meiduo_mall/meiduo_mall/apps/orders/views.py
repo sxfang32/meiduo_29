@@ -274,3 +274,89 @@ class UserCenterOrder(LoginRequiredView):
         # 将数据响应给前端
 
         return render(request, 'user_center_order.html', context)
+
+
+class OrderCommentView(LoginRequiredView):
+    """商品评论功能"""
+
+    def get(self, request):
+        #接收参数
+        order_id = request.GET.get('order_id')
+        #校验参数
+        try:
+            OrderGoods.objects.filter(order_id=order_id)
+        except OrderInfo.DoesNotExist:
+            return http.HttpResponseForbidden('参数有误')
+        #获取订单的所有未评价的商品
+        order_goods = OrderGoods.objects.filter(order_id=order_id,is_commented=False)
+        #创建列表,包装每种商品的信息
+        goods_list = []
+        #获取订单下的每种商品
+        for goods in order_goods:
+            goods_list.append({
+                'name': goods.sku.name,
+                'price': str(goods.price),
+                'default_image_url':goods.sku.default_image.url,
+                'order_id':goods.order_id,
+
+                'sku_id':goods.sku_id,
+                'display_score': goods.score,
+                'comment':goods.comment,
+                'is_anonymous':str(goods.is_anonymous)
+            })
+        #渲染模板
+        context = {
+            'uncomment_goods_list':goods_list,
+        }
+
+        return render(request,'goods_judge.html',context)
+
+
+    def post(self, request):
+
+        # axios.post(url, {
+        #     order_id: sku.order_id,
+        #     sku_id: sku.sku_id,
+        #     comment: sku.comment,
+        #     score: sku.final_score,
+        #     is_anonymous: sku.is_anonymous,
+        # 1.接收参数
+        user = request.user
+        json_dict = json.loads(request.body.decode())
+        order_id = json_dict.get('order_id')
+        sku_id = json_dict.get('sku_id')
+        comment = json_dict.get('comment')
+        score = json_dict.get('score')
+        is_anonymous = json_dict.get('is_anonymous')
+        # 2.校验参数
+        if not all([order_id, sku_id]):
+            return http.HttpResponseForbidden('缺少必传参数')
+        if len(comment) < 5:
+            return http.HttpResponseForbidden('评论长度应大于5')
+        try:
+            # 查看订单是否评论过
+            OrderInfo.objects.get(order_id=order_id, user=user, status=OrderInfo.ORDER_STATUS_ENUM['UNCOMMENT'])
+            sku = SKU.objects.get(id=sku_id)
+        except OrderInfo.DoesNotExist:
+            return http.HttpResponseForbidden('订单错误')
+        if is_anonymous:
+            # 判断数据是否为布尔类型
+            if not isinstance(is_anonymous,bool):
+                return http.HttpResponseForbidden('非指定参数')
+        # 3.处理业务逻辑
+
+        # 更新商品信息
+        OrderGoods.objects.filter(order_id=order_id, sku_id=sku_id).update(comment=comment, score=score, is_anonymous=is_anonymous, is_commented=True)
+
+        #商品评价+1
+        sku.comments += 1
+        sku.save()
+        #spu商品类型评价+1
+        sku.spu.comments+=1
+        sku.spu.save()
+
+        #如果该订单下的所有商品都评价了,修改订单状态为完成
+        if OrderGoods.objects.filter(order_id=order_id,is_commented=False).count() == 0:
+            OrderInfo.objects.filter(order_id=order_id).update(status=OrderInfo.ORDER_STATUS_ENUM['FINISHED'])
+        # 响应
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'评价成功'})

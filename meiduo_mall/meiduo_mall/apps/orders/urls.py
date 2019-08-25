@@ -6,4 +6,6 @@ urlpatterns = [
     url(r'^orders/commit/$', views.OrderCommitView.as_view()),
     url(r'^orders/success/$', views.OrderSuccessView.as_view()),
     url(r'^orders/info/(?P<page_num>\d+)/$', views.UserCenterOrder.as_view()),
+    # 商品评价
+    url(r'^orders/comment/$', views.OrderCommentView.as_view()),
 ]

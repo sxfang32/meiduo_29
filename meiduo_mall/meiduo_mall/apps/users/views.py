@@ -204,7 +204,12 @@ class EmailView(LoginRequiredView):
         user = request.user
 
         # 修改email
-        User.objects.filter(username=user.username).update(email=email)
+        user = User.objects.get(username=user.username)
+        user.email = email
+        user.save()
+        # User.objects.filter(username=user.username).update(email=email)
+        # user.email = email
+        # user.save()
 
         # 发送邮件
         # send_mail(subject='美多商城', # 邮件主题
@@ -214,7 +219,7 @@ class EmailView(LoginRequiredView):
         #           html_message="<a href='http://www.itcast.cn''>传智<a>")  # 超文本内容
         # verify_url = 'http://www.meiduo.site:8000/verify_email?token='
 
-        verify_url = generate_email_verify_url(request.user)
+        verify_url = generate_email_verify_url(user)
         send_verify_email.delay(email, verify_url)
         # 响应
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})

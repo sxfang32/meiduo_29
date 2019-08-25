@@ -14,6 +14,7 @@ var vm = new Vue({
         user_id: '',
         password: '',
         password2: '',
+        num:5,
 
         // 发送短信的标志
         sending_flag: false,
@@ -227,7 +228,22 @@ var vm = new Vue({
                         this.step_class['step-3'] = false;
                         this.is_show_form_3 = false;
                         this.is_show_form_4 = true;
-                    })
+                    });
+                var num = 5;
+                // 设置一个计时器
+                var t = setInterval(() => {
+                    if (num == 1) {
+                        // 如果计时器到最后, 清除计时器对象
+                        clearInterval(t);
+                        location.href = '/login/';
+                        // 将点击获取验证码的按钮展示的文本回复成原始文本
+                        // 将点击按钮的onclick事件函数恢复回去
+                    } else {
+                        num -= 1;
+                        // 展示倒计时信息
+                        this.num = num + '秒';
+                    }
+                }, 1000, 5)
                     .catch(error => {
                         alert(error.response.data.message);
                         console.log(error.response.data);

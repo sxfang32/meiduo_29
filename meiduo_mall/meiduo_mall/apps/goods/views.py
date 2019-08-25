@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views import View
 from contents.utls import get_categories
 from .models import GoodsCategory, SKU, GoodsVisitCount
+from orders.models import OrderGoods
 from django import http
 from django.core.paginator import Paginator, EmptyPage
 from goods.utils import get_breadcrumb
@@ -159,6 +160,7 @@ class DetailView(View):
 
 
 class DeatilVisitView(View):
+    """统计商品访问量"""
 
     def post(self, request, category_id):
 
@@ -180,3 +182,31 @@ class DeatilVisitView(View):
         visit_count_model.save()
 
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK'})
+
+
+class GoodsCommentView(View):
+    """获取商品评价"""
+
+    def get(self, request, sku_id):
+        # 获取已经下单的所有sku_id对应的商品（获取此商品的所有评论）
+        goods_comment = OrderGoods.objects.filter(sku_id=sku_id, is_commented=True)
+        # 创建一个列表，包装每条商品信息
+        comment_list = []
+        # 遍历获得每一条订单下的商品数据
+        for order_goods in goods_comment:
+            # 获取当前已经下单的商品的用户名
+            username = order_goods.order.user.username
+            if order_goods.is_anonymous == 1:
+                comment_list.append({
+                    'username': username[0] + "***" + username[-1],
+                    'comment': order_goods.comment,
+                    'score': order_goods.score,
+                })
+            else:
+                comment_list.append({
+                    'username': username,
+                    'comment': order_goods.comment,
+                    'score': order_goods.score,
+                })
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'comment_list': comment_list})

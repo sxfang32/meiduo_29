@@ -182,7 +182,11 @@ var vm = new Vue({
                     sms_code: this.sms_code,
                     access_token: this.access_token
                 }, {
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
                     responseType: 'json',
+                    withCredentials: true
                 })
                     .then(response => {
                         // 记录用户登录状态
