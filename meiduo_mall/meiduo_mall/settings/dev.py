@@ -309,6 +309,6 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
 # APP_SECRET = '6cd2b96b33185a3d7ab7bcdc6b36d0e6'
 # REDIRECT_URI = 'http://www.meiduo.site:8000/oauth2/'
 
-APP_KEY = '1814577788'
-APP_SECRET = 'e0e03ccb70ea63c9da6d845e0e80e85d'
+APP_KEY = '3889171625'
+APP_SECRET = '855350448d4b0d1578315b4060f319e8'
 REDIRECT_URI = 'http://www.meiduo.site:8000/wboauth_callback'
