@@ -218,7 +218,7 @@ var vm = new Vue({
                     access_token: this.access_token
                 }, {
                     headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'X-CSRFToken': getCookie('csrf_token')
                     },
                     responseType: 'json',
                     withCredentials: true
