@@ -45,10 +45,10 @@ class WeiboAuthUserView(View):
 
     def get(self, request):
         # 获取查询参数中的code
-        code = request.GET.get('code')
+        wb_code = request.GET.get('code')
 
         # 校验
-        if code is None:
+        if wb_code is None:
             return http.HttpResponseForbidden('缺少code')
         auth_weibo = sinaweibopy3.APIClient(
             app_key=settings.APP_KEY,
@@ -56,12 +56,12 @@ class WeiboAuthUserView(View):
             redirect_uri=settings.REDIRECT_URI)
 
         # 获取access_token和uid
-        result = auth_weibo.request_access_token(code)
+        result = auth_weibo.request_access_token(wb_code)
         access_token = result.access_token
         uid = result.uid
 
         redis_conn = get_redis_connection('verify_codes')
-        redis_conn.setex(code, 3600, access_token)
+        redis_conn.setex(wb_code, 3600, access_token)
         return render(request, 'sina_callback.html')
 
 
@@ -70,18 +70,19 @@ class ShowPageView(View):
 
     def get(self, request):
 
-        code = request.GET.get('code')
+        wb_code = request.GET.get('code')
 
         redis_conn = get_redis_connection('verify_codes')
-        access_token_bytes = redis_conn.get(code)
-        redis_conn.delete(code)
+        access_token_bytes = redis_conn.get(wb_code)
+        redis_conn.delete(wb_code)
         if not access_token_bytes:
             return http.JsonResponse({"message": "非法请求或code已过期"}, status=400)
         access_token = access_token_bytes.decode()
 
         # 判断用户是否登录过
         try:
-            user = OAuthWeiboUser.objects.get(wb_openid=access_token)
+            auth_model = OAuthWeiboUser.objects.get(wb_openid=access_token)
+            user = auth_model.user
             login(request, user)
             data = {
                 "user_id": user.id,
@@ -134,7 +135,7 @@ class ShowPageView(View):
             if not password_sy:
                 return http.JsonResponse({"message": "密码错误"}, status=406)
             OAuthWeiboUser.objects.get(user=user)
-            return http.JsonResponse({"message": "手机号以备绑定"}, status=407)
+            return http.JsonResponse({"message": "手机号已被绑定"}, status=407)
         except OAuthWeiboUser.DoesNotExist:
             wb_user = OAuthWeiboUser(
                 user_id=user.id,
@@ -143,14 +144,8 @@ class ShowPageView(View):
             wb_user.save()
             user_m = wb_user.user
         except User.DoesNotExist:
-            user_m = User(
-                mobile=mobile,
-                username="sms_%s" % mobile,
-                password=password
-            )
-            user_m.save()
+            user_m = User.objects.create_user(mobile=mobile, username="sms_%s" % mobile, password=password)
         login(request, user_m)
         response = http.JsonResponse({"token": access_token, "user_id": user_m.id, "username": user_m.username})
         response.set_cookie("username", user_m.username, max_age=settings.SESSION_COOKIE_AGE)
         return response
-
