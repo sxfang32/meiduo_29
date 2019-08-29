@@ -12,6 +12,7 @@ import re
 from meiduo_mall.utils.views import LoginRequiredView
 from users.models import Address
 from goods.models import SKU
+from verifications import constants
 from .models import OrderInfo, OrderGoods
 from meiduo_mall.utils.response_code import RETCODE
 
@@ -87,8 +88,12 @@ class OrderCommitView(LoginRequiredView):
         if pay_method not in [OrderInfo.PAY_METHODS_ENUM['CASH'], OrderInfo.PAY_METHODS_ENUM['ALIPAY']]:
             return http.HttpResponseForbidden('支付方式错误')
 
-        # 生成订单编号：20190820145030+ user_id
+        # # 生成订单编号：20190820145030+ user_id
         order_id = timezone.now().strftime('%Y%m%d%H%M%S') + '%09d' % user.id
+
+        # 单号存入Redis设置15分钟未付款自动关闭
+        redis_conn = get_redis_connection('order')
+        redis_conn.setex(order_id, constants.CANCEL_ORDER_TIME, "1")
 
         # 判断订单状态（三目运算法）
         status = (OrderInfo.ORDER_STATUS_ENUM['UNPAID']
@@ -197,6 +202,9 @@ class OrderCommitView(LoginRequiredView):
         pl.delete('selected_%s' % user.id)  # 将set移除
         pl.execute()
 
+        # 强调！这里不需要调用异步处理订单的函数，celery自己会处理！
+        # event_handler(order_id)
+
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '下单成功', 'order_id': order_id})
 
 
@@ -280,46 +288,39 @@ class OrderCommentView(LoginRequiredView):
     """商品评论功能"""
 
     def get(self, request):
-        #接收参数
+        # 接收参数
         order_id = request.GET.get('order_id')
-        #校验参数
+        # 校验参数
         try:
             OrderGoods.objects.filter(order_id=order_id)
         except OrderInfo.DoesNotExist:
             return http.HttpResponseForbidden('参数有误')
-        #获取订单的所有未评价的商品
-        order_goods = OrderGoods.objects.filter(order_id=order_id,is_commented=False)
-        #创建列表,包装每种商品的信息
+        # 获取订单的所有未评价的商品
+        order_goods = OrderGoods.objects.filter(order_id=order_id, is_commented=False)
+        # 创建列表,包装每种商品的信息
         goods_list = []
-        #获取订单下的每种商品
+        # 获取订单下的每种商品
         for goods in order_goods:
             goods_list.append({
                 'name': goods.sku.name,
                 'price': str(goods.price),
-                'default_image_url':goods.sku.default_image.url,
-                'order_id':goods.order_id,
+                'default_image_url': goods.sku.default_image.url,
+                'order_id': goods.order_id,
 
-                'sku_id':goods.sku_id,
+                'sku_id': goods.sku_id,
                 'display_score': goods.score,
-                'comment':goods.comment,
-                'is_anonymous':str(goods.is_anonymous)
+                'comment': goods.comment,
+                'is_anonymous': str(goods.is_anonymous)
             })
-        #渲染模板
+        # 渲染模板
         context = {
-            'uncomment_goods_list':goods_list,
+            'uncomment_goods_list': goods_list,
         }
 
-        return render(request,'goods_judge.html',context)
-
+        return render(request, 'goods_judge.html', context)
 
     def post(self, request):
 
-        # axios.post(url, {
-        #     order_id: sku.order_id,
-        #     sku_id: sku.sku_id,
-        #     comment: sku.comment,
-        #     score: sku.final_score,
-        #     is_anonymous: sku.is_anonymous,
         # 1.接收参数
         user = request.user
         json_dict = json.loads(request.body.decode())
@@ -341,22 +342,23 @@ class OrderCommentView(LoginRequiredView):
             return http.HttpResponseForbidden('订单错误')
         if is_anonymous:
             # 判断数据是否为布尔类型
-            if not isinstance(is_anonymous,bool):
+            if not isinstance(is_anonymous, bool):
                 return http.HttpResponseForbidden('非指定参数')
         # 3.处理业务逻辑
 
         # 更新商品信息
-        OrderGoods.objects.filter(order_id=order_id, sku_id=sku_id).update(comment=comment, score=score, is_anonymous=is_anonymous, is_commented=True)
+        OrderGoods.objects.filter(order_id=order_id, sku_id=sku_id).update(comment=comment, score=score,
+                                                                           is_anonymous=is_anonymous, is_commented=True)
 
-        #商品评价+1
+        # 商品评价+1
         sku.comments += 1
         sku.save()
-        #spu商品类型评价+1
-        sku.spu.comments+=1
+        # spu商品类型评价+1
+        sku.spu.comments += 1
         sku.spu.save()
 
-        #如果该订单下的所有商品都评价了,修改订单状态为完成
-        if OrderGoods.objects.filter(order_id=order_id,is_commented=False).count() == 0:
+        # 如果该订单下的所有商品都评价了,修改订单状态为完成
+        if OrderGoods.objects.filter(order_id=order_id, is_commented=False).count() == 0:
             OrderInfo.objects.filter(order_id=order_id).update(status=OrderInfo.ORDER_STATUS_ENUM['FINISHED'])
         # 响应
-        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'评价成功'})
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '评价成功'})

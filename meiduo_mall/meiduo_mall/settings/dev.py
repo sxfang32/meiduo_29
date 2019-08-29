@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'payment.apps.PaymentConfig',
     'weibo.apps.WeiboConfig',
 
-
     'haystack',
     'django_crontab',
 ]
@@ -141,9 +140,16 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "carts": {  # 用户浏览记录
+    "carts": {  # 购物车
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://192.168.27.128:6379/4",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "order": {  # 订单
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://192.168.27.128:6379/5",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
