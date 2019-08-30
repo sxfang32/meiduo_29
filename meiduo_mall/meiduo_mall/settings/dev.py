@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
+import datetime
 import os, sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -28,7 +28,7 @@ SECRET_KEY = 'enh#zx8+1+1^j#h@z7(*xy5vs^-hwaijq0wyd-eh&l#lfh$31$'
 # 默认开启调试模式：代码修改会自动重启，只有调试模式Django才提供静态文件访问支持
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.meiduo.site']
+ALLOWED_HOSTS = ['www.meiduo.site', '127.0.0.1']
 
 # Application definition
 
@@ -47,14 +47,16 @@ INSTALLED_APPS = [
     'contents.apps.ContentsConfig',  # 首页模块
     'goods.apps.GoodsConfig',  # 商品模块
     'orders.apps.OrdersConfig',  # 订单模块
-    'payment.apps.PaymentConfig',
-    'weibo.apps.WeiboConfig',
+    'payment.apps.PaymentConfig',  # 支付宝模块
+    'weibo.apps.WeiboConfig',  # 微博模块
 
     'haystack',
     'django_crontab',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -311,10 +313,29 @@ DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
 
 # #微博登录配置
-# APP_KEY = '4003951212'
-# APP_SECRET = '6cd2b96b33185a3d7ab7bcdc6b36d0e6'
-# REDIRECT_URI = 'http://www.meiduo.site:8000/oauth2/'
-
 APP_KEY = '3889171625'
 APP_SECRET = '855350448d4b0d1578315b4060f319e8'
 REDIRECT_URI = 'http://www.meiduo.site:8000/wboauth_callback'
+
+# CORS
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'http://www.meiduo.site:8080',
+    'http://api.meiduo.site:8000'
+)
+CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+
+# 身份认证
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  # 签发、验证
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=100),
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'meiduo_admin.utils.jwt_response_cutom_handler'
+}

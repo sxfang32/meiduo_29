@@ -29,4 +29,6 @@ urlpatterns = [
     url(r'^', include('payment.urls', namespace='payment')),  # 支付模块
     url(r'^search/', include('haystack.urls')),
     url(r'^', include('weibo.urls')),
+
+    url(r'^meiduo_admin/',include('meiduo_admin.urls')), # 管理后台
 ]
