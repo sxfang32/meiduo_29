@@ -8,12 +8,14 @@ from rest_framework.response import Response
 class LoginView(APIView):
 
     def post(self, request):
-        # 1.构建序列化器，传入前端浏览器参数进行校验
+        """后台登录功能"""
+        # 1.构建序列化器，传入前端数据
         s = LoginSerializer(data=request.data)
+        # 2.校验数据
         s.is_valid(raise_exception=True)
-        # 2.得到有效数据，构建响应对象
+        # 3.得到有效数据，构建响应对象
         return Response({
+            "token": s.validated_data['token'],
             "username": s.validated_data['user'].username,
-            "user_id": s.validated_data['user'].id,
-            "token": s.validated_data['token']
+            "user_id": s.validated_data['user'].id
         })
