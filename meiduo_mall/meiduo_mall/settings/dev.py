@@ -191,8 +191,8 @@ USE_I18N = True
 
 USE_L10N = True
 
-# USE_TZ = True
-USE_TZ = False
+USE_TZ = True
+# USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
@@ -337,5 +337,5 @@ REST_FRAMEWORK = {
 
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=100),
-    'JWT_RESPONSE_PAYLOAD_HANDLER': 'meiduo_admin.utils.jwt_response_cutom_handler'
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'meiduo_mall.apps.meiduo_admin.utils.jwt_response_cutom_handler'
 }

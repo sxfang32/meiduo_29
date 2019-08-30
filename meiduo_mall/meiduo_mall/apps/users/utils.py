@@ -28,6 +28,12 @@ class UsernameMobileAuthBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         # 1.查询user（可以通过用户名或手机号动态查询用户）
         user = get_user_by_account(username)
+
+        # 如果此次request返回的是None，那么说明是后台站点登录
+        if request is None:
+            if not user.is_staff:
+                return None
+
         # 2.校验密码是否正确
         if user and user.check_password(password):
             # 3.返回user或None
