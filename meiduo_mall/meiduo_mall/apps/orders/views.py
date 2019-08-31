@@ -94,6 +94,7 @@ class OrderCommitView(LoginRequiredView):
         # 单号存入Redis设置15分钟未付款自动关闭
         redis_conn = get_redis_connection('order')
         redis_conn.setex(order_id, constants.CANCEL_ORDER_TIME, "1")
+        # redis_conn.setex(order_id, 20, "1")     # 测试阶段
 
         # 判断订单状态（三目运算法）
         status = (OrderInfo.ORDER_STATUS_ENUM['UNPAID']

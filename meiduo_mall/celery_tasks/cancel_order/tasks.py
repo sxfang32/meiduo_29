@@ -54,9 +54,9 @@ def event_handler(msg):
 pubsub.psubscribe(**{'__keyevent@5__:expired': event_handler})
 
 # 接收订阅的通知，不需要死循环，否则项目无法启动
-
-message = pubsub.get_message()
-if message:
-    print(message)
-else:
-    time.sleep(0.01)
+while True:
+    message = pubsub.get_message()
+    if message:
+        print(message)
+    else:
+        time.sleep(0.01)
