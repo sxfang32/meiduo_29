@@ -1,13 +1,13 @@
 from meiduo_admin.serializers.user_serializer import *
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListCreateAPIView
 from users.models import User
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from meiduo_admin.pages import MyPage
 
 
-class UserAPIView(ListAPIView):
-    queryset = User.objects.filter(is_staff=True)
+class UserAPIView(ListCreateAPIView):
+    queryset = User.objects.filter(is_staff=True).order_by('id')
     serializer_class = UserModelSerializer
 
     pagination_class = MyPage
