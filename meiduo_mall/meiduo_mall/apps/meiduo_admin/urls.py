@@ -4,6 +4,7 @@ from meiduo_admin.views.home_view import HomeView, GoodsVisitCountView
 from meiduo_admin.views.user_view import *
 from meiduo_admin.views.login_view import *
 from meiduo_admin.views.sku_view import *
+from meiduo_admin.views.spu_view import *
 from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
@@ -29,6 +30,9 @@ urlpatterns = [
 
     # 获得spu可选规格及选项信息
     url(r'^goods/(?P<pk>\d+)/specs/$', SPUSpecOptView.as_view()),
+
+    # spu管理
+    url(r'^goods/$', SPUViewSet.as_view({'get': 'list'})),
 ]
 
 # 主页URL
