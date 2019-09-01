@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from goods.models import SPU
 
+
 class SPUModelSerializer(serializers.ModelSerializer):
     brand = serializers.StringRelatedField()
     brand_id = serializers.IntegerField()
