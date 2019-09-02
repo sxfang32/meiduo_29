@@ -5,6 +5,7 @@ from meiduo_admin.views.user_view import *
 from meiduo_admin.views.login_view import *
 from meiduo_admin.views.sku_view import *
 from meiduo_admin.views.spu_view import *
+from meiduo_admin.views.spec_view import *
 from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
@@ -49,5 +50,6 @@ urlpatterns = [
 # 可以使用该对象，多次对不同的视图集进行注册
 router = SimpleRouter()
 router.register(prefix='statistical', viewset=HomeView, base_name='home')
+router.register(prefix='goods/specs',viewset=SpecViewSet,base_name='spec')
 router.register(prefix='goods', viewset=SPUViewSet, base_name='spu')
 urlpatterns += router.urls
