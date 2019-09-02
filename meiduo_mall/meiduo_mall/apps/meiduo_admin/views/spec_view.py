@@ -8,3 +8,4 @@ class SpecViewSet(ModelViewSet):
     queryset = SPUSpecification.objects.all().order_by('pk')
     serializer_class = SpecModelSerializer
     pagination_class = MyPage
+
