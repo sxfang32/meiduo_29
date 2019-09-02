@@ -6,6 +6,8 @@ from meiduo_admin.views.login_view import *
 from meiduo_admin.views.sku_view import *
 from meiduo_admin.views.spu_view import *
 from meiduo_admin.views.spec_view import *
+from meiduo_admin.views.option_view import *
+from meiduo_admin.views.channel_view import *
 from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
@@ -44,12 +46,30 @@ urlpatterns = [
 
     # 获得新增spu可选二、三级分类信息
     url(r'^goods/channel/categories/(?P<pk>\d+)/$', SPUCategoryView.as_view()),
+
+    # 选项表管理
+    url(r'^specs/options/$', OptViewSet.as_view({"get": "list", "post": "create"})),
+
+    url(r'^specs/options/(?P<pk>\d+)/$', OptViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"})),
+
+    # 获得新增选项可选规格信息
+    url(r'^goods/specs/simple/$', OptSpecView.as_view()),
+
+    # 频道管理
+    url(r'^goods/channels/$', ChannelViewSet.as_view({"get": "list", "post": "create"})),
+    url(r'^goods/channels/(?P<pk>\d+)/$', ChannelViewSet.as_view({"get":"retrieve","delete": "destroy", "put": "update"})),
+
+    # 新建频道可选一级分类信息
+    url(r'^goods/categories/$', SPUCategoryView.as_view()),
+
+    # 新建频道可选分组信息
+    url(r'^goods/channel_types/$', ChannelGroupView.as_view()),
 ]
 
 # 路由对象只需要有一个
 # 可以使用该对象，多次对不同的视图集进行注册
 router = SimpleRouter()
 router.register(prefix='statistical', viewset=HomeView, base_name='home')
-router.register(prefix='goods/specs',viewset=SpecViewSet,base_name='spec')
+router.register(prefix='goods/specs', viewset=SpecViewSet, base_name='spec')
 router.register(prefix='goods', viewset=SPUViewSet, base_name='spu')
 urlpatterns += router.urls
