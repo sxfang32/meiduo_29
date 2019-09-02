@@ -20,7 +20,7 @@ urlpatterns = [
 
     # SKU表管理
     url(r'^skus/$', SKUViewSet.as_view({'get': 'list', "post": "create"})),
-    url(r'^skus/(?P<pk>\d+)/$', SKUViewSet.as_view({'get': 'retrieve', "post": "create", "delete": "destroy", "put": "update"})),
+    url(r'^skus/(?P<pk>\d+)/$', SKUViewSet.as_view({'get': 'retrieve', "delete": "destroy", "put": "update"})),
 
     # 获得新建sku可选三级分类
     url(r'^skus/categories/$', GoodsCategoryView.as_view()),
@@ -32,11 +32,22 @@ urlpatterns = [
     url(r'^goods/(?P<pk>\d+)/specs/$', SPUSpecOptView.as_view()),
 
     # spu管理
-    url(r'^goods/$', SPUViewSet.as_view({'get': 'list'})),
+    # url(r'^goods/$', SPUViewSet.as_view({'get': 'list', "post": "create"})),
+    # url(r'^goods/(?P<pk>\d+)/$', SPUViewSet.as_view({'get': 'retrieve', "put": "update", "delete": "destroy"})),
+
+    # 获得新知spu可选品牌信息
+    url(r'^goods/brands/simple/$', SPUViewSet.as_view({'get': 'spu_brands'})),
+
+    # 获得新增spu可选一级分类信息
+    url(r'^goods/channel/categories/$', SPUCategoryView.as_view()),
+
+    # 获得新增spu可选二、三级分类信息
+    url(r'^goods/channel/categories/(?P<pk>\d+)/$', SPUCategoryView.as_view()),
 ]
 
-# 主页URL
-# 1、用户总数统计
+# 路由对象只需要有一个
+# 可以使用该对象，多次对不同的视图集进行注册
 router = SimpleRouter()
 router.register(prefix='statistical', viewset=HomeView, base_name='home')
+router.register(prefix='goods', viewset=SPUViewSet, base_name='spu')
 urlpatterns += router.urls

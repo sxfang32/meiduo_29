@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from goods.models import SPU
+from goods.models import SPU, Brand, GoodsCategory
 
 
 class SPUModelSerializer(serializers.ModelSerializer):
@@ -11,4 +11,17 @@ class SPUModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SPU
-        fields = "__all__"
+        # fields = "__all__"
+        exclude = ['category1', 'category2', 'category3']
+
+
+class SPUBrandSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = ['id', 'name']
+
+
+class SPUCategorySimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoodsCategory
+        fields = ['id', 'name']
