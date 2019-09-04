@@ -2,7 +2,6 @@ from django.conf.urls import url
 from rest_framework_jwt.views import obtain_jwt_token
 from meiduo_admin.views.home_view import HomeView, GoodsVisitCountView
 from meiduo_admin.views.user_view import *
-from meiduo_admin.views.login_view import *
 from meiduo_admin.views.sku_view import *
 from meiduo_admin.views.spu_view import *
 from meiduo_admin.views.spec_view import *
@@ -57,7 +56,8 @@ urlpatterns = [
 
     # 频道管理
     url(r'^goods/channels/$', ChannelViewSet.as_view({"get": "list", "post": "create"})),
-    url(r'^goods/channels/(?P<pk>\d+)/$', ChannelViewSet.as_view({"get":"retrieve","delete": "destroy", "put": "update"})),
+    url(r'^goods/channels/(?P<pk>\d+)/$',
+        ChannelViewSet.as_view({"get": "retrieve", "delete": "destroy", "put": "update"})),
 
     # 新建频道可选一级分类信息
     url(r'^goods/categories/$', SPUCategoryView.as_view()),
