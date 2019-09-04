@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from goods.models import SKUImage
+from goods.models import SKU,SKUImage
 from meiduo_admin.serializers.image_serializer import *
 from meiduo_admin.pages import MyPage
 
