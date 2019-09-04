@@ -110,6 +110,9 @@ class SKU(BaseModel):
 class SKUImage(BaseModel):
     """SKU图片"""
     sku = models.ForeignKey(SKU, on_delete=models.CASCADE, verbose_name='sku')
+
+    # ImageField： 文件类型的字段
+    # 前端传来一个文件数据 ——> 在校验阶段会构建成文件对象 ——> 会调用django存储后端实现文件保存
     image = models.ImageField(verbose_name='图片')
 
     class Meta:

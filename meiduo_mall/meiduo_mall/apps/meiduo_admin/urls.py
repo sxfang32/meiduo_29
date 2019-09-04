@@ -7,6 +7,8 @@ from meiduo_admin.views.spu_view import *
 from meiduo_admin.views.spec_view import *
 from meiduo_admin.views.option_view import *
 from meiduo_admin.views.channel_view import *
+from meiduo_admin.views.brands_view import *
+from meiduo_admin.views.image_view import *
 from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
@@ -64,6 +66,17 @@ urlpatterns = [
 
     # 新建频道可选分组信息
     url(r'^goods/channel_types/$', ChannelGroupView.as_view()),
+
+    url(r'^goods/brands/$', BrandViewSet.as_view({"get": "list", "post": "create"})),
+    url(r'^goods/brands/(?P<pk>\d+)/$',
+        BrandViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"})),
+
+    # 图片管理
+    url(r'^skus/images/$', ImageViewSet.as_view({"get": "list", "post": "create"})),
+    url(r'^skus/images/(?P<pk>\d+)/$', ImageViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"})),
+    # 新增图片可选skus
+    url(r'^skus/simple/$', ImageViewSet.as_view({"get": "get_skus"})),
+
 ]
 
 # 路由对象只需要有一个

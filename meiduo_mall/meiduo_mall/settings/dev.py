@@ -200,7 +200,6 @@ USE_TZ = True
 # 静态文件访问路由前端
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 # 日志输出
 LOGGING = {
     'version': 1,
@@ -271,10 +270,13 @@ EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
 # MEDIA_URL = 'http://192.168.27.128:8888/'
 
 # 修改Django的文件存储类
+# 所有文件类型字段在保存新建或更新的时候，会自动调用该后端实现。
 DEFAULT_FILE_STORAGE = 'meiduo_mall.utils.fastdfs.fdfs_storage.FastDFSStorage'
 
 # 指定远程图片文件的绝对路径前半段（路由）
 FDFS_BASE_URL = 'http://image.meiduo.site:8888/'
+
+FDFS_CONF_PATH = os.path.join(BASE_DIR, 'utils', 'fastdfs', 'client.conf')
 
 # 支付宝
 ALIPAY_APPID = '2016101400684429'
