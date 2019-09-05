@@ -80,7 +80,13 @@ urlpatterns = [
 
     # 订单管理
     url(r'^orders/$', OrderInfoView.as_view()),
+
+    # 修改订单状态
+    url(r'^orders/(?P<pk>\d+)/status/$', OrderInfoDetailView.as_view()),
+
     url(r'^orders/(?P<pk>\d+)/$', OrderInfoDetailView.as_view()),
+
+
 
 ]
 

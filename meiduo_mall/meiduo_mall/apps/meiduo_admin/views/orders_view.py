@@ -1,5 +1,4 @@
-from rest_framework.mixins import ListModelMixin
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView,UpdateAPIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from orders.models import OrderInfo
 from meiduo_admin.serializers.orders_serializer import *
@@ -19,6 +18,7 @@ class OrderInfoView(ListAPIView):
         return self.queryset.all()
 
 
-class OrderInfoDetailView(RetrieveAPIView):
+class OrderInfoDetailView(RetrieveAPIView, UpdateAPIView):
     queryset = OrderInfo.objects.all()
     serializer_class = OrderInfoDetailSerializer
+
