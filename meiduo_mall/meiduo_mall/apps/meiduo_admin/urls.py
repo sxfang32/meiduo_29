@@ -10,6 +10,9 @@ from meiduo_admin.views.channel_view import *
 from meiduo_admin.views.brands_view import *
 from meiduo_admin.views.image_view import *
 from meiduo_admin.views.orders_view import *
+from meiduo_admin.views.perm_view import *
+from meiduo_admin.views.group_view import *
+from meiduo_admin.views.admin_view import *
 from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
@@ -86,7 +89,28 @@ urlpatterns = [
 
     url(r'^orders/(?P<pk>\d+)/$', OrderInfoDetailView.as_view()),
 
+    # 权限管理
+    url(r'^permission/perms/$', PermViewSet.as_view({"get": "list", "post": "create"})),
+    url(r'^permission/perms/(?P<pk>\d+)/$',
+        PermViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"})),
 
+    url(r'^permission/content_types/$', PermTypeView.as_view()),
+
+    # 分组管理
+    url(r'^permission/groups/$', GroupViewSet.as_view({"get": "list", "post": "create"})),
+    url(r'^permission/groups/(?P<pk>\d+)/$',
+        GroupViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"})),
+
+    url(r'^permission/simple/$', PermSimpleView.as_view()),
+
+    # 管理员管理
+    url(r'^permission/admins/$', AdminViewSet.as_view({"get": "list", "post": "create"})),
+
+    url(r'^permission/admins/(?P<pk>\d+)/$',
+        AdminViewSet.as_view({"get": "retrieve", "put": "update", "delete": "destroy"})),
+
+    # 新建管理员可选分组信息
+    url(r'^permission/groups/simple/$', AdminGroupSimpleView.as_view()),
 
 ]
 

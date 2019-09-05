@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'haystack',
     'django_crontab',
     'corsheaders',
+    'django_extensions',
+    'werkzeug_debugger_runserver',
 ]
 
 MIDDLEWARE = [
