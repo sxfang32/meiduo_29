@@ -28,7 +28,7 @@ SECRET_KEY = 'enh#zx8+1+1^j#h@z7(*xy5vs^-hwaijq0wyd-eh&l#lfh$31$'
 # 默认开启调试模式：代码修改会自动重启，只有调试模式Django才提供静态文件访问支持
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.meiduo.site', '127.0.0.1']
+ALLOWED_HOSTS = ['*','www.meiduo.site', '127.0.0.1','backend.meiduo.site']
 
 # Application definition
 
@@ -326,7 +326,8 @@ CORS_ORIGIN_WHITELIST = (
     'http://127.0.0.1:8080',
     'http://localhost:8080',
     'http://www.meiduo.site:8080',
-    'http://api.meiduo.site:8000'
+    'http://api.meiduo.site:8000',
+    'http://192.168.27.128',
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
 

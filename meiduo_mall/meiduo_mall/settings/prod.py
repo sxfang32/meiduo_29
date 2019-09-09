@@ -10,7 +10,7 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
+import datetime
 import os, sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -29,7 +29,7 @@ SECRET_KEY = 'enh#zx8+1+1^j#h@z7(*xy5vs^-hwaijq0wyd-eh&l#lfh$31$'
 # 默认开启调试模式：代码修改会自动重启，只有调试模式Django才提供静态文件访问支持
 DEBUG = False
 
-ALLOWED_HOSTS = ['www.meiduo.site']
+ALLOWED_HOSTS = ['*','www.meiduo.site', '127.0.0.1','backend.meiduo.site','www.meiduo.site']
 
 # Application definition
 
@@ -52,6 +52,9 @@ INSTALLED_APPS = [
 
     'haystack',
     'django_crontab',
+    'corsheaders',
+    'django_extensions',
+    'werkzeug_debugger_runserver',
 ]
 
 MIDDLEWARE = [
@@ -260,7 +263,6 @@ EMAIL_HOST_USER = 'itcast99@163.com'  # 授权的邮箱
 EMAIL_HOST_PASSWORD = 'python99'  # 邮箱授权时获得的密码，非注册登录密码
 EMAIL_FROM = '美多商城<itcast99@163.com>'  # 发件人抬头
 
-EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
 EMAIL_VERIFY_URL = 'http://www.meiduo.site/emails/verification/'
 
 # 指定远程图片文件的绝对路径前半段（路由）
@@ -308,3 +310,33 @@ DATABASE_ROUTERS = ['meiduo_mall.utils.db_router.MasterSlaveDBRouter']
 
 # 静态文件收集目录
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
+
+# #微博登录配置
+APP_KEY = '3889171625'
+APP_SECRET = '855350448d4b0d1578315b4060f319e8'
+REDIRECT_URI = 'http://www.meiduo.site:8000/wboauth_callback'
+
+# CORS
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+    'http://www.meiduo.site:8080',
+    'http://api.meiduo.site:8000',
+    'http://192.168.27.128',
+)
+CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+
+# 身份认证
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  # 签发、验证
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=100),
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'meiduo_mall.apps.meiduo_admin.utils.jwt_response_cutom_handler'
+}
+

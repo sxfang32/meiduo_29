@@ -5,6 +5,7 @@ from meiduo_admin.serializers.admin_serializer import *
 from meiduo_admin.serializers.group_serializer import *
 from meiduo_admin.pages import MyPage
 from django.contrib.auth.models import Group
+from rest_framework_extensions.cache.mixins import CaacheResponseMinxin
 
 
 class AdminViewSet(ModelViewSet):
