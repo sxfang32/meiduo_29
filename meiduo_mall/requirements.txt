@@ -17,7 +17,7 @@ django-filter==2.2.0
 django-haystack==2.8.1
 django-redis==4.10.0
 django-werkzeug-debugger-runserver==0.3.1
-djangorestframework==3.8.2
+djangorestframework==3.11.2
 djangorestframework-jwt==1.11.0
 elasticsearch==2.4.1
 fdfs-client-py==1.2.6
